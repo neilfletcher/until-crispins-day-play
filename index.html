@@ -149,6 +149,16 @@ body[data-view="menu"] .menubtn,body[data-view="saves"] .menubtn,body[data-view=
   .main{grid-template-columns:1fr;gap:26px}
   .track li{font-size:11.5px}
 }
+@media (max-width:520px){
+  .wrap{padding:14px 16px 40px}
+  .top h1{font-size:27px}
+  .topr{width:100%;justify-content:flex-start;align-items:center;gap:8px}
+  .topr #runlabel:empty{display:none}
+  .menubtn{min-height:40px;padding:6px 12px}
+  .track li{font-size:0;overflow:visible}
+  .track li.now{font-size:12px}
+  .track li.now:nth-child(n+4){direction:rtl}
+}
 </style>
 </head>
 <body>
@@ -206,7 +216,7 @@ const ITEM = {
 };
 const KNOW = {
   k_dice: "Cutler's bone die has a six that comes up as if it were paid to.",
-  k_plot: 'Cambridge, Scrope and Grey mean to kill the King before the fleet sails. The Earl of March goes to the King with it, and their heads go up over the Bargate.',
+  k_plot: 'Cambridge, Scrope and Grey mean to kill the King before the fleet sails. The Earl of March goes to the King with it, and they lose their heads outside the Bargate.',
   k_shell: 'The mussels off the Harfleur mud carry the flux.',
   k_sortie: 'The garrison of Harfleur sallies from the Leure gate by night.',
   k_pyx: 'The King hangs the man who takes the pyx from the church. He was your friend.',
@@ -314,8 +324,8 @@ scene('s_dice', 'soton', "Cutler's dice", `The company is waiting on the wind an
 
 scene('s_plot', 'soton', 'Something heard at the Bargate', `You are sent up to the town for lamp oil and come back by the wrong alley. Through a shutter you hear well-fed voices not bothering to whisper: the Earl of March on the throne, the King and his brothers dead before the fleet sails, and Lord Scrope's name, and Cambridge's, and Sir Thomas Grey's. Then a chair scrapes and you remember that you are a cobbler's boy standing under a window with an oil jar.`, [
   { t: 'Take it to Cutler', test: ['wits', 8, 'talk'],
-    win: [`He hears you out, then walks you to a serjeant-at-arms, who walks you to a clerk, who writes for a long time. Two days later the three lords are taken. By then the Earl of March, whom they meant to make king, has gone to the King himself and told him all of it. Their heads go up over the Bargate before the fleet sails. Nobody thanks you, exactly, but Cutler has started using your name.`, { st: 2, learn: 'k_plot', echo: { at: 'harfleur', t: "A serjeant-at-arms of the King's household nods to you in the trenches. You last saw him writing down three names at Southampton." } }],
-    lose: [`'You heard lords plotting,' Cutler says, 'through a wall. With an oil jar.' He gives you latrine duty for spreading alarm. Two days later the Earl of March goes to the King with the whole of it, and three heads go up over the Bargate. Cutler does not apologise, but he does take you off the latrines.`, { st: -1, learn: 'k_plot' }] },
+    win: [`He hears you out, then walks you to a serjeant-at-arms, who walks you to a clerk, who writes for a long time. Two days later the three lords are taken. By then the Earl of March, whom they meant to make king, has gone to the King himself and told him all of it. They lose their heads outside the Bargate before the fleet sails. Nobody thanks you, exactly, but Cutler has started using your name.`, { st: 2, learn: 'k_plot', echo: { at: 'harfleur', t: "A serjeant-at-arms of the King's household nods to you in the trenches. You last saw him writing down three names at Southampton." } }],
+    lose: [`'You heard lords plotting,' Cutler says, 'through a wall. With an oil jar.' He gives you latrine duty for spreading alarm. Two days later the Earl of March goes to the King with the whole of it, and three men lose their heads outside the Bargate. Cutler does not apologise, but he does take you off the latrines.`, { st: -1, learn: 'k_plot' }] },
   { t: "Forget you heard it. Lords' business gets cobblers hanged.",
     out: [`You carry the oil back and keep your mouth shut. Two days later the plot comes out anyway: the Earl of March himself went to the King with it, and Cambridge, Scrope and Grey lose their heads outside the Bargate. You watch from the crowd, and feel sick for more than one reason.`, { learn: 'k_plot' }] },
   { t: 'Give Cutler the three names, and tell him March will confess it all to the King by Wednesday', know: 'k_plot',
@@ -456,7 +466,7 @@ scene('h_perkin', 'harfleur', "Perkin's first", `Perkin killed a man in the tren
     out: [`You had your own, in one life or another, and nobody sat with you. He gets through it on his own, as most do. But something that was easy between you has gone stiff.`, { grit: 1, flag: 'cold' }] }
 ], { thread: 'perkin', when: perkinHere });
 
-scene('flux', 'harfleur', 'The bloody flux', () => `It comes for the whole army in the third week. Men who were hauling guns on Monday are in the sick lines by Thursday and in the long trench by Sunday. Two thousand die of it and the King sends five thousand more home in the ships, the Duke of Clarence and the Earl Marshal among them. An earl goes exactly as a ploughman goes, and loses as much of his dignity on the way.${S.flags.shell ? ' You think about the mussels.' : ''}${S.flags.fruit ? ' You think about the apples.' : ''}${S.flags.drank ? ' You think about the ditch water.' : ''}
+scene('flux', 'harfleur', 'The bloody flux', () => `It comes for the whole army in the third week. Men who were hauling guns on Monday are in the sick lines by Thursday and in the long trench by Sunday. Men say two thousand die of it, and the clerks count five thousand more sent home in the ships, the Duke of Clarence and the Earl Marshal among them. An earl goes exactly as a ploughman goes, and loses as much of his dignity on the way.${S.flags.shell ? ' You think about the mussels.' : ''}${S.flags.fruit ? ' You think about the apples.' : ''}${S.flags.drank ? ' You think about the ditch water.' : ''}
 
 On the twenty-second of September Harfleur gives up its keys. By then the gripes have found you too.`, [
   { t: 'Sweat it out on your feet', test: ['grit', () => fluxDc(), 'flux'],
@@ -848,7 +858,7 @@ const WOUNDS = [
 const LOW = 'You are one bad hour from the long trench. The others have started to look at you as men look at a lame horse.';
 const IDLE = {
   debt: ['By your reckoning you have earned a few shillings of the forty, and spent some of them already.', "You catch yourself pricing everything: a sheaf, a loaf, a man's boots, the man.", 'Sixpence a day. You have worked it out in loaves, in boots and in days still to live, and it comes out thin every way.', 'Somewhere in Winchester your name is written in a book with a sum beside it. You think of it whenever a clerk looks up.'],
-  girl: ['Her ribbon is wound round your bow hand under the bracer, where Cutler cannot see it.', () => S.flags.wrote ? 'You wonder whether your letter has reached Winchester yet, and who read it to her.' : S.flags.wrote_father ? 'The letter went to her father. The one for her you are still composing in your head. It is very good, and you will never send it.' : 'You have been composing a letter in your head for days. It is very good, and you will never send it.', 'You have caught yourself saving things up to tell her, and then remembering how long it will be.', 'The candle-end is still in your purse. You have not lit it. You are keeping it for worse dark than this.'],
+  girl: ['Her ribbon is wound round your bow hand under the bracer, where Cutler cannot see it.', () => S.flags.wrote ? 'You wonder whether your letter has reached Winchester yet, and who read it to her.' : S.flags.wrote_father ? 'The letter went to her father. The one for her you are still composing in your head. It is very good, and you will never send it.' : 'You have been composing a letter in your head for days. It is very good, and you will never send it.', 'You have caught yourself saving things up to tell her, and then remembering how long it will be.', () => S.flags.candle_lit ? 'What is left of the candle is still in your purse. You are keeping the rest for worse dark than this.' : 'The candle-end is still in your purse. You have not lit it. You are keeping it for worse dark than this.'],
   brother: ["Dickon's old bracer is on your arm. It has never fitted you.", "You look for Suffolk's banner whenever the army shifts ground, and you do not let yourself think about why.", 'Somebody says a Suffolk man has been flogged, and you are halfway across the camp before you hear it was nobody you know.', 'You have started to stand as Dickon stands, with your feet too wide. Ieuan has noticed and said nothing, which is worse.']
 };
 const WAKE_WANT = {
@@ -919,7 +929,7 @@ scene('home_h_girl', 'harfleur', 'Word from Winchester', `A ship from Southampto
   { t: 'Send every penny you have home with the ship', if: () => S.coin > 0,
     out: [() => S.coin === 1 ? `Every penny you have turns out to be one penny. You tie it in a rag, which makes it look like more, and give it to a wounded man-at-arms who is being shipped home and seems honest. It will reach her before Michaelmas. A pewterer can send a great deal more than a penny, but he cannot send his last one.` : S.coin < 6 ? `You tie the pennies in a rag and give them to a wounded man-at-arms who is being shipped home and seems honest. It is not much. Still, it is everything, and it will reach her before Michaelmas, and that is more than the pewterer can say of anything he has sent.` : `You tie it in a rag and give it to a wounded man-at-arms who is being shipped home and seems honest. It is a fair weight of silver for an archer, and it will reach her before Michaelmas, and all of it is yours, which is more than the pewterer can say of anything he has sent.`, () => ({ c: -S.coin, grit: 1, flag: 'sent' })] },
   { t: 'Light the candle',
-    out: [`You light it in the trench, behind your hand. It burns for about as long as a Mass. Somebody asks what you are doing and you say you are reading, and he very decently does not point out that you have no book.`, { heal: 1 }] },
+    out: [`You light it in the trench, behind your hand. It burns for about as long as a Mass. Somebody asks what you are doing and you say you are reading, and he very decently does not point out that you have no book.`, { heal: 1, flag: 'candle_lit' }] },
   { t: 'Burn the letter',
     out: [`Michaelmas is the twenty-ninth of September, and you are in a ditch in Normandy. You put the letter in the fire, and Ieuan watches you do it. 'Ah,' he says. 'One of those.' There is nothing to do with what you feel except carry it up to the walls, and you do that.`, { grit: 1 }] }
 ]);
@@ -1076,7 +1086,7 @@ scene('m_ieuan2', 'march', 'Where a horse will not go', `At a halt above the riv
 scene('m_cutler', 'march', 'Four men', `Cutler lost his second to the flux at Harfleur, a Kentish man he had soldiered with for ten years, and has not named another. Tonight he calls you over. 'Four men,' he says. 'The two Suffolk boys, old Hodge and the one who talks to himself. They're yours on the march. See they eat, see they've each a stake, see they're there when I count.' He looks at you. 'It's not a favour, cobbler. Men who mind other men stop minding themselves, and I'm short of fools.'`, [
   { t: 'Take the four', test: ['wits', 6],
     win: [`You find that you know how. You know which of them will drop out at a hill and which will pick a fight at a halt, since you have seen them do both. All four answer every count from there to the Somme. Cutler says nothing about it, and stops counting your end of the line himself.`, { st: 2 }],
-    lose: [`Old Hodge sits down under a hedge on the third day and will not get up, and you cannot make him. Cutler strikes the name off without a word to you. You would rather he had shouted.`, { st: 1 }] },
+    lose: [`Old Hodge sits down under a hedge on the third day and will not get up, and you cannot make him. Cutler strikes the name off without a word to you. You would rather he had shouted.`, { st: 1, flag: 'hodge_gone' }] },
   { t: 'Ask him why you',
     out: [`He thinks about it. 'You look at them like you've buried them already,' he says. 'I've known serjeants like that. They're careful with men, as you'd be careful with a thing you've broken once.' He does not ask how you came by the look, and you take the four.`, { st: 1, wits: 1 }] },
   { t: 'Tell him you are not the man for it',
@@ -1241,7 +1251,7 @@ scene('bm_boy', 'battle', 'The boy with the sheaves', `A boy of ten or eleven co
   { t: 'Take two, before the Cheshire men do', test: ['wits', 3],
     win: [`You have both before he knows it. A Cheshire archer with an empty bag gives you a look that will keep. You find that you can live with it.`, { ar: 2, st: -1 }],
     lose: [`You get one. The second is torn out of your hand by a Cheshire man, who leaves you with a fistful of feathers and his opinion of you.`, { ar: 1 }] },
-  { t: 'Send him on to Ieuan, who will not waste them',
+  { t: 'Send him on to Ieuan, who will not waste them', if: () => !S.played.bm_ieuan,
     out: [`You point, and the boy goes. Ieuan takes two sheaves and sets them point-down in the earth without a glance. Then he looks along the line at you and touches his cap, slowly, as he would to an equal.`, { st: 1, wits: 1 }] }
 ], { bm: 1 });
 scene('bm_knight', 'battle', 'A man in the mud', `A French man-at-arms has fallen out of the front of the press and lies ten paces from your stake, on his back, held down by his own harness in mud like glue. He has got his visor up. He is holding out his right gauntlet towards you, which is how a gentleman yields, and he is shouting a name and a sum of money.`, [
@@ -1332,7 +1342,7 @@ scene('x_chaplain', 'any', "The chaplain's questions", `A chaplain of the King's
 /* ================= v0.6: fast routes through acts already mastered ================= */
 const FAST_AFTER = 2;
 const knowsAct = a => ((M.done || {})[a] || 0) >= FAST_AFTER;
-scene('fast_soton', 'soton', 'Ten days in Southampton', `You do not live these days so much as walk through them. You know which plank on the quay is loose. You know what Cutler will say before he has drawn the breath to say it, and who will win at dice, and which heads will go up over the Bargate. The days go past you like a road you have walked too often to see. You cannot be everywhere in them, though, and you have to decide what to make sure of.`, [
+scene('fast_soton', 'soton', 'Ten days in Southampton', `You do not live these days so much as walk through them. You know which plank on the quay is loose. You know what Cutler will say before he has drawn the breath to say it, and who will win at dice, and which lords will lose their heads outside the Bargate. The days go past you like a road you have walked too often to see. You cannot be everywhere in them, though, and you have to decide what to make sure of.`, [
   { t: 'Perkin. Keep him close and out of trouble.', if: perkinHere,
     out: [`You are at his elbow when he thinks of running, and when he thinks of dicing, and when Reeve looks at him. By the time the fleet sails he has stopped wondering how you always happen to be there. He has decided that you are simply that sort of friend.`, { flag: 'bond', grit: 1, pull: ['perkin', 2], say: 'Perkin will keep close to you.' }] },
   { t: 'Cutler. Be where he looks, every time he looks.',
@@ -1368,11 +1378,11 @@ scene('s_horses', 'soton', 'Loading the horses', `The army is taking ten thousan
   { t: 'Stand well back, with everybody else',
     out: [`It takes them most of the morning and a second groom. You watch from behind a bollard with the rest of the twenty and learn four new oaths, three of them from the knight.`, {}] }
 ], { pool: 1 });
-scene('s_bargate', 'soton', 'Three heads over the Bargate', `The Earl of Cambridge, Lord Scrope and Sir Thomas Grey meant to kill the King before he sailed, and it has ended as such things do. The heads have gone up over the Bargate on spikes, and the whole army has found a reason to walk past. Scrope was the King's friend and shared his bed as a boy. People say the King wept, and then signed. A pie-seller has set up underneath, and is doing well.`, [
-  { t: 'Look at them properly',
-    out: [`You make yourself do it. They look smaller than you expected, and surprised. Three weeks ago any one of them could have had you whipped for not getting out of the road. You find that you have less fear of lords than you had this morning, and more of the King.`, { eye: 1 }] },
+scene('s_bargate', 'soton', 'Three heads at the Bargate', `The Earl of Cambridge, Lord Scrope and Sir Thomas Grey meant to kill the King before he sailed, and it has ended as such things do. Grey went first and the two lords three days after him, on a block outside the Bargate, and the whole army has found a reason to walk past the place. Scrope was the King's friend, and had shared his bed and his counsel. People say the King wept, and then signed. The straw is still down, and darker than straw should be. They say Scrope's head has gone north in a cask, to sit over a gate at York. A pie-seller has set up beside the block, and is doing well.`, [
+  { t: 'Look at the place properly',
+    out: [`You make yourself do it. It is a smaller patch of ground than you expected, for three such men. Three weeks ago any one of them could have had you whipped for not getting out of the road. You find that you have less fear of lords than you had this morning, and more of the King.`, { eye: 1 }] },
   { t: 'Watch the crowd, since everyone else is watching the gate', test: ['eye', 7],
-    win: [`There is a boy working the press with a small knife, cutting purse strings while their owners gape upward. You take him by the wrist as his hand goes into Cutler's belt. Cutler looks at the boy, and the knife, and you. He lets the boy go with a kick, and he counts his money, and then for some reason he counts yours.`, { st: 1, c: 3 }],
+    win: [`There is a boy working the press with a small knife, cutting purse strings while their owners gape at the block. You take him by the wrist as his hand goes into Cutler's belt. Cutler looks at the boy, and the knife, and you. He lets the boy go with a kick, and he counts his money, and then for some reason he counts yours.`, { st: 1, c: 3 }],
     lose: [`You watch the crowd so closely that you do not feel the tug at your own belt. He was good, whoever he was. He left you the purse and took only what was in it.`, () => ({ c: -Math.min(S.coin, 3) })] },
   { t: 'Buy a pie, and look at the sea',
     out: [`It is a good pie. You eat it on the quay with your back to the town. It seems to you that a man who can eat under a traitor's head might do well enough in France, and you would rather not be that man just yet.`, { heal: 1 }], cost: 1 }
@@ -1847,7 +1857,7 @@ scene('bm_empty', 'battle', 'An empty bag', `Your hand goes to the bag and finds
 ], { bm: 1, when: () => S.arrows < 1 });
 
 /* ================= v0.14: more incidents, a reason scene on the eve, and the days between ================= */
-scene('s_feathers', 'soton', 'Six feathers a goose', `The sheriffs of every county south of the Trent were told to send six wing feathers from every goose, and they have. The feathers have come to Southampton by the cartload, and a master fletcher from the Tower is standing among the sacks like a man drowning in snow. He has shafts, heads, glue and thread, and not nearly enough hands. He is paying in arrows, since he has nothing else.`, [
+scene('s_feathers', 'soton', 'Goose feathers', `The King's fletchers have been buying goose feathers out of every county in the south since the spring, six from a wing and no more, so the bird lives to grow them again. They have come to Southampton by the cartload, and a master fletcher from the Tower is standing among the sacks like a man drowning in snow. He has shafts, heads, glue and thread, and not nearly enough hands. He is paying in arrows, since he has nothing else.`, [
   { t: 'Sit down and learn to fletch', test: ['wits', 7, 'labour'],
     win: [`It is nearer to your own trade than you expected: a straight cut, a steady hand and thread pulled tight. By the end of the day the fletcher has stopped checking your work, which you take as praise. He pays you a sheaf, and you can tell a good arrow from a bad one now by running it through your fingers.`, { ar: 1, eye: 1 }],
     lose: [`You glue your thumb to a shaft and three feathers to your thumb. The fletcher looks at what you have made, and then at you, and says that the French will be glad of the laugh. He gives you a handful of rejects out of pity.`, {}] },
@@ -1885,7 +1895,7 @@ scene('s_surgeon', 'soton', "The King's surgeon", `Master Thomas Morstede, the K
   { t: 'Go away. You would sooner not know.',
     out: [`You have always thought it better not to look inside things that are working. You go and shoot at the butts until the picture of the long spoons has gone out of your head, which takes some time.`, { arm: 1 }] }
 ], { pool: 1 });
-scene('s_wages', 'soton', "The first quarter's wages", `The King pays the first quarter in advance, and he has pawned half the jewels of England to do it. The money comes down from the lords to the knights, and from the knights to men like Cutler, and at each step a little sticks. When it reaches the twenty, Cutler pays it out on a barrel head, coin by coin. Then he holds out a leather bag and says that every man puts a penny in the company purse for the burying of those who will need it.`, [
+scene('s_wages', 'soton', "The first quarter's wages", `The King pays the first quarter in advance, and he has pledged half the jewels of England against the second. The money comes down from the lords to the knights, and from the knights to men like Cutler, and at each step a little sticks. When it reaches the twenty, Cutler pays it out on a barrel head, coin by coin. Then he holds out a leather bag and says that every man puts a penny in the company purse for the burying of those who will need it.`, [
   { t: 'Put in your penny without a word',
     out: [`It goes in with the rest. Later you learn that the purse is honest: it has buried four men of his in ten years and sent money to two widows. Cutler does not explain this to anyone. He lets them think what they like, and notes who paid quietly.`, { c: 5, st: 1 }] },
   { t: 'Ask him who holds the purse, and who counts it', test: ['wits', 8, 'talk'],
@@ -1921,7 +1931,7 @@ scene('h_pit', 'harfleur', 'The burying', `The flux is killing men faster than s
   { t: 'Bury them as they came',
     out: [`You put them in as they are, and you put them in straight, with their feet to the east as it should be done. It takes longer. The priest, when he turns round, sees which end of the pit was dug by men who cared, and asks the name of your vintenar.`, { st: 1, arm: 1 }] },
   { t: 'Say the names over them, as far as anybody knows the names', test: ['grit', 7],
-    win: [`Somebody ought to. You get the names from the hurdle-bearers, where they have them, and you say each one aloud as the man goes in. By the end the twenty has stopped talking and Perkin is saying them with you. It changes nothing for the dead. For the living it is a help.`, { wits: 1, pull: ['perkin', 1] }],
+    win: [() => `Somebody ought to. You get the names from the hurdle-bearers, where they have them, and you say each one aloud as the man goes in. By the end the twenty has stopped talking and ${perkinHere() ? 'Perkin is' : 'two or three of them are'} saying them with you. It changes nothing for the dead. For the living it is a help.`, () => (perkinHere() ? { wits: 1, pull: ['perkin', 1] } : { wits: 1 })],
     lose: [`You get as far as the ninth. He is a boy from Alton, about your age, with a face you have seen at the butts. After that you find you cannot make your voice work, and you dig.`, {}] }
 ], { pool: 1 });
 scene('h_townsman', 'harfleur', 'A man from the town', `A man comes out of the marsh with his hands held wide, and the pickets very nearly shoot him. He is a cooper of Harfleur, he says, in the scraps of English a port teaches. There are children inside eating boiled leather, the garrison has taken the last of the grain, and he will tell where the wall is weakest by the Montivilliers gate for a loaf and a promise that his house will be let alone. He is thin enough to be telling the truth. Then again, a spy would be thin too.`, [
@@ -1964,13 +1974,13 @@ scene('m_nuts', 'march', 'Hazelnuts', `The bread ran out two days ago. What the 
 ], { pool: 1 });
 scene('m_sick', 'march', 'A man who cannot walk', `Hodge has the flux again. He has had it since Harfleur and hidden it, and now he has sat down on the bank with his bow across his knees and told the twenty to go on, he will come up with them. Everybody knows what that means. The country people are following the column at a distance, as crows follow a plough. The baggage is a mile behind and has no room, and Cutler has his orders, which are to keep closed up.`, [
   { t: 'Get him on your back', test: ['arm', 9, 'march labour'],
-    win: [`He is not heavy any more, which is the worst of it. You carry him four miles, with Perkin taking his bow and Ieuan your pack, and at the halt you find a carter who owes Cutler a favour. Hodge rides to Calais on a sack of horse bread. Cutler looks at you across the fire that night as a man looks at something he had not expected to own.`, { st: 2, grit: 1 }],
-    lose: [`You carry him a mile and a half, and then your legs go, and you are both in the road. Two men-at-arms put him on a led horse out of plain shame at being shown up by an archer. You have wrenched something in your back that will not be right before Calais.`, { st: 1, b: -1 }] },
+    win: [`He is not heavy any more, which is the worst of it. You carry him four miles, with one of the Suffolk boys taking his bow and Ieuan your pack, and at the halt you find a carter who owes Cutler a favour. Hodge rides to Calais on a sack of horse bread. Cutler looks at you across the fire that night as a man looks at something he had not expected to own.`, { st: 2, grit: 1, flag: 'hodge_gone' }],
+    lose: [`You carry him a mile and a half, and then your legs go, and you are both in the road. Two men-at-arms put him on a led horse out of plain shame at being shown up by an archer. You have wrenched something in your back that will not be right before Calais.`, { st: 1, b: -1, flag: 'hodge_gone' }] },
   { t: 'Pay a carter to find room', cost: 4,
-    out: [`It is a groat, and a groat is a great deal of money to give for a place on a cart. The carter bites it, looks at Hodge, and shifts two sacks. Hodge does not thank you. He is not able to. But he looks at you from among the sacks as the cart goes by, and you would not have that look back for the groat.`, { grit: 1, st: 1 }] },
+    out: [`It is a groat, and a groat is a great deal of money to give for a place on a cart. The carter bites it, looks at Hodge, and shifts two sacks. Hodge does not thank you. He is not able to. But he looks at you from among the sacks as the cart goes by, and you would not have that look back for the groat.`, { grit: 1, st: 1, flag: 'hodge_gone' }] },
   { t: 'Leave him your water, and go on with the rest',
-    out: [`You put the skin in his hand. He nods, and you nod, and neither of you says anything, since anything you said would be a lie. You do not look back. Nobody in the twenty looks back. Nobody speaks, either, for the rest of that day.`, { b: -1 }] }
-], { pool: 1 });
+    out: [`You put the skin in his hand. He nods, and you nod, and neither of you says anything, since anything you said would be a lie. You do not look back. Nobody in the twenty looks back. Nobody speaks, either, for the rest of that day.`, { b: -1, flag: 'hodge_gone' }] }
+], { pool: 1, when: () => !S.flags.hodge_gone });
 scene('m_horsemeat', 'march', 'A dead horse', `A knight's courser has foundered in the road and been knocked on the head. It lies in the ditch with its legs out stiff, and round it stands a ring of archers who have had nothing for three days but nuts. Nobody has drawn a knife yet. The horse belongs to Sir Thomas somebody, whose squire is standing over it with his hand on his sword and a face that says a gentleman's horse is not meat. Privately, he looks as hungry as anyone.`, [
   { t: 'Offer the squire the first cut, and the hide', test: ['wits', 7, 'talk'],
     win: [`You say it respectfully, as a man who knows leather: the hide is worth a shilling in Calais, and it will be worth nothing by tomorrow, and would his master not sooner have it flayed properly? He lets you. You take the hide off in one piece, as you were taught, and the squire gets the saddle of it, and forty men eat. Your share is the heart.`, { heal: 2, st: 1 }],
@@ -2454,7 +2464,7 @@ Then he gives you a message from Alys herself, got to him by way of the same sis
   { t: 'Give him every penny you have, to send back with the ships', if: () => S.coin > 0,
     out: [`He has a cousin among the sick who is being shipped home. You count it into his hand, all of it, and he looks at the heap and then at you. 'For her?' For her. He ties it into his shirt. It will be in Winchester before Michaelmas. It is not what a pewterer could send. But a pewterer has never yet sent everything he had.`, () => ({ c: -S.coin, grit: 1, flag: 'sent' })] },
   { t: 'Light the candle',
-    out: [`You light it in the bottom of the trench, with your hood held round it. It burns for about as long as a Mass, and for that long the trench is a room. Hodge asks what you are at. You tell him you are reading. He does not ask what.`, { heal: 1 }] },
+    out: [`You light it in the bottom of the trench, with your hood held round it. It burns for about as long as a Mass, and for that long the trench is a room. Hodge asks what you are at. You tell him you are reading. He does not ask what.`, { heal: 1, flag: 'candle_lit' }] },
   { t: 'Ask him nothing more, and go back to the trench',
     out: [`You thank him. You are civil about it. Then you go up to the forward trench, where the garrison's crossbows can reach, and you dig there for the rest of the day with your whole back, in plain sight of the wall. Ieuan comes and digs beside you for a while and says nothing at all.`, { grit: 1 }] }
 ]);
@@ -2589,7 +2599,7 @@ scene('landing_b', 'harfleur', 'The first night ashore', `The King camps the arm
 
 scene('m_open_b', 'march', 'Who stays', `The King is leaving twelve hundred men in Harfleur under his uncle the Earl of Dorset, to hold what five weeks and two thousand lives have bought. Every vintenar has been asked for names. Two of the twenty will stay behind walls, with bread and a roof, while the rest walk a hundred and fifty miles through France on eight days' food. Cutler has not said who. The whole twenty is being very useful this morning.`, [
   { t: 'Ask to stay', test: ['wits', 7, 'talk'],
-    win: [`You tell him the garrison will want a cobbler, and it is true. He looks at you a while and then gives your name. You watch the army march out through the Montivilliers gate, and Perkin looks back once. The winter is long, and dull, and nobody dies of it. Christmas comes and goes. One night in January you go to sleep in a dry bed behind a stone wall.\n\nTar. Gulls. The quay under your boots, and Cutler saying the same words in the same order.`, { end: 'stay' }],
+    win: [`You tell him the garrison will want a cobbler, and it is true. He looks at you a while and then gives your name. You watch the army march out through the Montivilliers gate, and Cutler looks back once. The winter is long, and dull, and nobody dies of it. Christmas comes and goes. One night in January you go to sleep in a dry bed behind a stone wall.\n\nTar. Gulls. The quay under your boots, and Cutler saying the same words in the same order.`, { end: 'stay' }],
     lose: [`'A cobbler,' Cutler says. 'Aye. They'll want one. So will I, on the road.' He gives two other names. He has not thought the better of you for asking.`, { st: -1 }] },
   { t: 'Tell Cutler which two could not stand the march',
     out: [`Old Hodge's chest is bad, and the lad from Alton has not been right since the flux. You say so, privately. Cutler had settled on those two already. He nods. 'I wanted to see whether you'd name them or yourself,' he says.`, { st: 1 }] },
@@ -2920,6 +2930,12 @@ function bonus(c) {
   if (battle && bonded() && perkinHere() && T.includes('melee')) b += 1;
   return Math.max(-3, Math.min(3, b));
 }
+function fixNames(t, sid) {
+  if (!t || !S) return t;
+  if (S.played.bm_ieuan && (sid === 'b_order' || sid === 'b_order_b' || sid === 'bm_mud')) t = t.replace(/\bIeuan\b/g, 'Hodge');
+  if (S.flags.hodge_gone) t = t.replace(/\bHodge\b/g, 'Tib');
+  return t;
+}
 function dcOf(c) { const sc = cur(); return (typeof c.test[1] === 'function' ? c.test[1]() : c.test[1]) + HARD[S.act] - (sc && sc.id === 'b_brother' ? Math.min(3, M.heroFails || 0) : 0); }
 function chance(c) { return pNeed(dcOf(c) - S.stats[c.test[0]] - bonus(c)); }
 const oddsWord = p => p >= 0.9 ? 'near certain' : p >= 0.7 ? 'good odds' : p >= 0.45 ? 'even odds' : p >= 0.22 ? 'long odds' : 'a prayer';
@@ -2975,7 +2991,7 @@ function choose(i) {
     }
     out = ok ? c.win : c.lose; went = ok ? 'w' : 'l';
   }
-  let text = typeof out[0] === 'function' ? out[0]() : out[0];
+  let text = fixNames(typeof out[0] === 'function' ? out[0]() : out[0], sc.id);
   const before = S.blood;
   apply(out[1], L);
   M.took = M.took || {}; M.took[(sc.base || sc.id) + ':' + i] = [went, L.map(x => x[0]).filter(t => !/^Noted under|^You will remember/.test(t)).join(', '), M.runs];
@@ -3016,7 +3032,7 @@ const WANT_ASK = {
   vow: "have left your offering at the cobblers' altar in Southampton, and heard out the man from Soissons on the march"
 };
 /* Anonymous play counts. Only the public release loads the analytics tag; everywhere else this does nothing. */
-function track(name, p) { try { if (typeof gtag === 'function') gtag('event', name, Object.assign({ waking: M ? M.runs + (S && S.banked ? 0 : 1) : 0, version: '0.24' }, p || {})); } catch (e) {} }
+function track(name, p) { try { if (typeof gtag === 'function') gtag('event', name, Object.assign({ waking: M ? M.runs + (S && S.banked ? 0 : 1) : 0, version: '0.25' }, p || {})); } catch (e) {} }
 /* The author's record of how games go. Only the public release has the settings for it; everywhere else this does nothing. */
 const FB = {"projectId": "until-crispins-day", "apiKey": "AIzaSyC8t1QwGPsrX5cJ6TzwcXrVU6s4rzvFJnU"};
 function fbv(v) {
@@ -3030,11 +3046,11 @@ function report() {
   if (!FB || !M || typeof fetch !== 'function') return;
   try {
     if (!M.pid) M.pid = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
-    if (!M.startedAt) M.startedAt = new Date().toISOString();
+    if (!M.startedAt) { M.startedAt = new Date().toISOString(); M.preRuns = M.runs || 0; }
     const seen = M.seen || {};
-    const doc = { name: String(M.name || '').slice(0, 30), want: M.want || '', version: '0.24', started: M.startedAt, updated: new Date().toISOString(),
+    const doc = { name: String(M.name || '').slice(0, 30), want: M.want || '', version: '0.25', started: M.startedAt, updated: new Date().toISOString(),
       runs: M.runs || 0, far: M.far || 0, wins: M.wins || 0, wonAt: M.wonAt || 0, trueAt: M.trueAt || 0, lived: M.lived || 0,
-      scenes: Object.values(seen).reduce((a, b) => a + b, 0), seen: seen, ends: M.ends || {}, lastEnd: M.lastEnd || '', found: Object.keys(M.how || {}).length };
+      scenes: Object.values(seen).reduce((a, b) => a + b, 0), seen: seen, ends: M.ends || {}, lastEnd: M.lastEnd || '', pre: M.preRuns || 0, found: Object.keys(M.how || {}).length };
     const f = {}; Object.keys(doc).forEach(k => { f[k] = fbv(doc[k]); });
     fetch('https://firestore.googleapis.com/v1/projects/' + FB.projectId + '/databases/(default)/documents/players/' + M.pid + '?key=' + FB.apiKey,
       { method: 'PATCH', keepalive: true, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fields: f }) }).catch(() => {});
@@ -3174,7 +3190,7 @@ Tar. Gulls. It is not over. The saints, it seems, wanted more from the day than 
     if (ph === 'choose') {
       if (S.bridge) h += '<p class="bridge">' + esc(S.bridge) + '</p>';
       if (S.seenBefore) h += '<p class="again">' + AGAIN[Math.min(AGAIN.length, S.seenN || 1) - 1] + '</p>';
-      h += paras((typeof sc.text === 'function' ? sc.text() : sc.text) + (VARY[sc.id] ? '\n\n' + VARY[sc.id][((M.seen[sc.id] || 1) - 1) % VARY[sc.id].length] : ''));
+      h += paras(fixNames(typeof sc.text === 'function' ? sc.text() : sc.text, sc.id) + (VARY[sc.id] ? '\n\n' + VARY[sc.id][((M.seen[sc.id] || 1) - 1) % VARY[sc.id].length] : ''));
       if (sc.input) h += '<label class="namein" for="nameIn">Your name<input id="nameIn" type="text" maxlength="18" autocomplete="off" value="' + esc(M.name || 'Adam') + '"></label>';
       h += '<div class="choices">';
       visible(sc).forEach(({ c, i }) => {
@@ -3402,7 +3418,7 @@ function screenHtml() {
     paras(sl && sl.M.runs >= 1 ? `You are a cordwainer's apprentice with a borrowed bow, the twentieth man in a company of twenty archers. You have died in France, and woken on the quay at Southampton with all of it still in your head. Something is wanted of you. You do not yet know what it is.` : `It is August 1415. The King is taking an army to France, and you have taken his sixpence. You know nothing about war, and you are about to learn.`) +
     (sl ? '<p class="note">' + esc(SLOT_NAME[STORE.active] + ': ' + slotLine(sl)) + '</p>' : '') +
     '<div class="menu"><button class="go" type="button" data-act="play">' + (sl ? 'Continue' : 'Begin') + '</button><button class="choice" type="button" data-act="saves">Saved games</button><button class="choice" type="button" data-act="help">How it works</button></div>' +
-    '<p class="ver">Version 0.24. The game saves itself in this browser after every choice.</p>' +
+    '<p class="ver">Version 0.25. The game saves itself in this browser after every choice.</p>' +
     (typeof gtag === 'function' || FB ? '<p class="ver">This page counts plays, and keeps a note of your archer\'s name and how far he got, so the author can see how the game plays. It does not know who you are.</p>' : '') +
     '<p class="ver">© 2026 Neil Fletcher. Found something broken or odd? <a href="https://github.com/neilfletcher/until-crispins-day-play/issues" target="_blank" rel="noopener">Tell me here</a>.</p>';
   if (view === 'menu') return '<p class="eyebrow"><span>' + esc(SLOT_NAME[STORE.active]) + '</span></p><h2>Menu</h2><div class="menu">' +
