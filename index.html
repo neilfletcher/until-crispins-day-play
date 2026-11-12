@@ -129,6 +129,8 @@ body[data-view="menu"] .menubtn,body[data-view="saves"] .menubtn,body[data-view=
 .up button{font-family:var(--label);font-weight:700;font-size:14.5px;letter-spacing:.06em;padding:7px 12px;border:1px solid var(--tallow);border-radius:3px;background:transparent;color:var(--tallow);cursor:pointer;white-space:nowrap}
 .up button:hover:not(:disabled){background:var(--tallow);color:var(--peat)}
 .up button:disabled{border-color:var(--clay);color:#746c5d;cursor:default}
+.others li{margin-bottom:6px}
+.others .mem{color:var(--tallow)}
 .how li{color:var(--bone);font-size:18px;margin-bottom:4px}
 .how li.new{color:var(--tallow)}
 .how li.new b{font-family:var(--label);font-size:13px;letter-spacing:.09em;text-transform:uppercase;border:1px solid var(--tallow);border-radius:3px;padding:1px 6px;margin-right:6px;vertical-align:2px}
@@ -2199,7 +2201,7 @@ function enter() {
     if (!S.chap) { S.chap = {}; ACTS.slice(0, ACTS.indexOf(S.act) + (S.i > 0 ? 1 : 0)).forEach(a => { S.chap[a] = 1; }); }
     const opens = sc.act !== 'any' && sc.id !== 'origin' && CHAPTER[sc.act] && !S.chap[sc.act];
     track('scene_view', { scene: sc.id, act: sc.act });
-    if (opens) { track('reached_' + sc.act); S.chap[sc.act] = 1; M.chapSeen = M.chapSeen || {}; S.chapFull = !M.chapSeen[sc.act] && (M.runs < 1 || ACTS.indexOf(sc.act) > prevFar); M.chapSeen[sc.act] = 1; }
+    if (opens) { track('reached_' + sc.act); report(); S.chap[sc.act] = 1; M.chapSeen = M.chapSeen || {}; S.chapFull = !M.chapSeen[sc.act] && (M.runs < 1 || ACTS.indexOf(sc.act) > prevFar); M.chapSeen[sc.act] = 1; }
     S.phase = opens ? 'chapter' : 'choose'; S.result = null;
     return;
   }
@@ -2283,7 +2285,7 @@ function choose(i) {
   apply(out[1], L);
   M.took = M.took || {}; M.took[sc.id + ':' + i] = [went, L.map(x => x[0]).filter(t => !/^Noted under|^You will remember/.test(t)).join(', '), M.runs];
   S.hurt = S.blood - before;
-  if (sc.id !== 'origin') S.journal.push([S.date || ACT_NAME[S.act], titleOf(sc), c.t]);
+  if (sc.id !== 'origin') { S.journal.push([S.date || ACT_NAME[S.act], titleOf(sc), c.t]); S.picks = S.picks || []; S.picks.push([sc.id, i, titleOf(sc), c.t, sc.choices.length]); }
   if (sc.after) { const more = sc.after(i); if (more) text += '\n\n' + more; }
   let dead = S.blood <= 0;
   if (dead && M.up.notyet && !S.flags.notyet && !S.flags.wenthome && !(out[1] && out[1].die)) {
@@ -2319,17 +2321,65 @@ const WANT_ASK = {
 };
 /* Anonymous play counts. Only the public release loads the analytics tag; everywhere else this does nothing. */
 function track(name, p) { try { if (typeof gtag === 'function') gtag('event', name, Object.assign({ waking: M ? M.runs + (S && S.banked ? 0 : 1) : 0, version: '0.14' }, p || {})); } catch (e) {} }
+/* The author's record of how games go. Only the public release has the settings for it; everywhere else this does nothing. */
+const FB = {"projectId": "until-crispins-day", "apiKey": "AIzaSyC8t1QwGPsrX5cJ6TzwcXrVU6s4rzvFJnU"};
+function fbv(v) {
+  if (typeof v === 'number') return Number.isInteger(v) ? { integerValue: String(v) } : { doubleValue: v };
+  if (typeof v === 'string') return { stringValue: v };
+  if (typeof v === 'boolean') return { booleanValue: v };
+  if (v && typeof v === 'object') { const f = {}; Object.keys(v).forEach(k => { f[k] = fbv(v[k]); }); return { mapValue: { fields: f } }; }
+  return { nullValue: null };
+}
+function report() {
+  if (!FB || !M || typeof fetch !== 'function') return;
+  try {
+    if (!M.pid) M.pid = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+    if (!M.startedAt) M.startedAt = new Date().toISOString();
+    const seen = M.seen || {};
+    const doc = { name: String(M.name || '').slice(0, 30), want: M.want || '', version: '0.14', started: M.startedAt, updated: new Date().toISOString(),
+      runs: M.runs || 0, far: M.far || 0, wins: M.wins || 0, wonAt: M.wonAt || 0, trueAt: M.trueAt || 0, lived: M.lived || 0,
+      scenes: Object.values(seen).reduce((a, b) => a + b, 0), seen: seen, ends: M.ends || {}, lastEnd: M.lastEnd || '', found: Object.keys(M.how || {}).length };
+    const f = {}; Object.keys(doc).forEach(k => { f[k] = fbv(doc[k]); });
+    fetch('https://firestore.googleapis.com/v1/projects/' + FB.projectId + '/databases/(default)/documents/players/' + M.pid + '?key=' + FB.apiKey,
+      { method: 'PATCH', keepalive: true, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fields: f }) }).catch(() => {});
+  } catch (e) {}
+}
+/* What other players chose: one shared tally, added to at the end of each run and read back for the end screen. */
+function shareChoices() {
+  if (!FB || typeof fetch !== 'function' || !S.picks || !S.picks.length) return;
+  const picks = S.picks.slice(), run = S, base = 'https://firestore.googleapis.com/v1/projects/' + FB.projectId + '/databases/(default)/documents', q = '?key=' + FB.apiKey;
+  const body = { writes: [{ transform: { document: 'projects/' + FB.projectId + '/databases/(default)/documents/stats/choices',
+    fieldTransforms: picks.map(([id, i]) => ({ fieldPath: id + '__' + i, increment: { integerValue: '1' } })) } }] };
+  fetch(base + ':commit' + q, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+    .then(() => fetch(base + '/stats/choices' + q)).then(r => r.json()).then(d => {
+      const f = (d && d.fields) || {}, n = k => +((f[k] || {}).integerValue || 0), rows = [];
+      picks.forEach(([id, i, title, text, len]) => {
+        let tot = 0; for (let k = 0; k < len; k++) tot += n(id + '__' + k);
+        if (len > 1 && tot >= 5) rows.push([title, text, Math.round(100 * n(id + '__' + i) / tot)]);
+      });
+      rows.sort((a, b) => a[2] - b[2]);
+      const pick = rows.length <= 6 ? rows : rows.slice(0, 4).concat(rows.slice(-2));
+      if (S === run && pick.length) { S.others = pick; save(); render(); }
+    }).catch(() => {});
+}
+function othersHtml() {
+  if (!S.others || !S.others.length) return '';
+  return '<p class="sub">What other archers did</p><ul class="known others">' + S.others.map(([t, c, p]) =>
+    '<li><b>' + esc(t) + '.</b> ' + esc(c) + '. <span class="mem">' + (p <= 0 ? 'Almost nobody else chose this.' : p >= 100 ? 'Everybody chooses this.' : p + ' in a hundred chose the same.') + '</span></li>').join('') + '</ul>';
+}
 function finishRun(how) {
   M.lastHow = how; M.runs++; M.lessons += S.lessons; S.banked = 1;
   const sc0 = S.queue[S.i] ? S.queue[S.i].id : '', end = how === 'dead' ? (S.flags.wenthome === 'gaveup' ? 'gave_up' : S.flags.wenthome ? 'left' : 'died') : how === 'lived' ? 'survived' : 'saved_duke';
   track('waking_end', { result: end, act: S.act, scene: sc0, waking: M.runs });
   track('end_' + end + '_' + S.act, { scene: sc0, waking: M.runs });
   if (M.runs === 1) track('first_waking_over', { result: end, act: S.act, waking: 1 });
+  M.ends = M.ends || {}; M.ends[end + '_' + S.act] = (M.ends[end + '_' + S.act] || 0) + 1; M.lastEnd = end + '_' + S.act;
   if (how === 'dead') M.last = S.flags.wenthome === 'gaveup' ? 'because you stopped, which the saints seem to allow' : S.flags.wenthome === 'stay' ? 'in a dry bed behind the walls of Harfleur, of nothing at all' : S.flags.wenthome ? 'in your own bed in Winchester, of nothing at all' : DIED_WHERE[S.act];
   if (how === 'lived') { M.lived = (M.lived || 0) + 1; M.last = 'in your sleep, as far as you can tell, the night after the battle'; }
   if (how === 'won') { M.wins++; if (!M.wonAt) M.wonAt = M.runs; S.tier = pairDone() ? 'true' : 'hero'; if (S.tier === 'true' && !M.trueAt) M.trueAt = M.runs;
     track(S.tier === 'true' ? 'ending_true' : 'ending_hero', { waking: M.runs });
     if (S.tier === 'true' && M.trueAt === M.runs) track('completed_game', { waking: M.runs }); else if (M.wonAt === M.runs) track('first_win', { waking: M.runs }); }
+  report(); shareChoices();
 }
 function endRun(how) {
   if (how === 'lived') S.lessons += 2;
@@ -2418,7 +2468,7 @@ function renderStory() {
     h = '<p class="eyebrow"><span>Maisoncelle, the night after</span>' + pips() + '</p><h2>Alive at the end of it</h2>' + paras(`The French dead are counted in thousands and the English, they say, in hundreds. The King asks a herald the name of the castle beyond the wood, and is told Agincourt, and says the battle shall be called by it. It rains again. You lie down among the living in a barn at Maisoncelle, alive at the end of St Crispin's Day, and you think it may be over.
 
 Tar. Gulls. It is not over. The saints, it seems, wanted more from the day than your skin.`) +
-      '<p class="note">Living through the day is not what is being asked of you.</p>' + wantedHtml() +
+      '<p class="note">Living through the day is not what is being asked of you.</p>' + wantedHtml() + othersHtml() +
       '<ul class="fx"><li class="mem">' + S.lessons + ' lessons carried back</li></ul><button class="go grim" type="button" data-act="camp">Wake</button>';
   } else {
     const sc = cur();
@@ -2447,7 +2497,7 @@ Tar. Gulls. It is not over. The saints, it seems, wanted more from the day than 
       const r = S.result;
       h += '<div class="outcome' + (r.dead ? ' fatal' : '') + '">' + paras(r.text) + r.notes.map(n => '<p class="note">' + esc(n) + '</p>').join('') + (r.dead && !S.flags.wenthome ? '<p>' + esc(M.runs >= 8 && M.runs % 2 ? LATE_DEATH[(M.runs >> 1) % LATE_DEATH.length] : DEATH_LINE[S.act]) + '</p>' : '') + '</div>' + fxList(r.L);
       h += r.dead
-        ? (M.runs <= 1 ? '' : '<ul class="fx"><li class="mem">' + S.lessons + ' lessons carried back</li></ul>') + journalHtml(true) + '<button class="go grim" type="button" data-act="camp">' + (M.runs <= 1 ? 'Go on' : 'Wake') + '</button>'
+        ? (M.runs <= 1 ? '' : '<ul class="fx"><li class="mem">' + S.lessons + ' lessons carried back</li></ul>') + othersHtml() + journalHtml(true) + '<button class="go grim" type="button" data-act="camp">' + (M.runs <= 1 ? 'Go on' : 'Wake') + '</button>'
         : '<button class="go" type="button" data-act="go">' + (S.flags.hero && S.queue[S.i].id === 'b_hero' ? 'The King turns his head' : 'Go on') + '</button>';
     }
   }
@@ -2517,7 +2567,7 @@ ${wantEnd()}
 
 You lie down that night in the barn at Maisoncelle and you are afraid to close your eyes. When you open them, there is straw. There is frost on the dead in the field, and somebody is frying bacon, and it is the twenty-sixth of October. ${S.tier === 'true' ? 'You look in your fist for the awl and it is gone. Your boots are whole, and they are your own work.' : 'Your boots have a hole in them. You look in your fist for the awl and it is gone.'}`) +
     (S.tier === 'true' ? '<p class="note">It took you ' + M.runs + ' wakings to finish the pair. There is nothing left undone.</p>' : '<p class="note">It took you ' + M.wonAt + ' ' + (M.wonAt === 1 ? 'waking' : 'wakings') + ' to reach the day after St Crispin\'s. The day holds. Your own work is not finished.</p>' + wantedHtml()) +
-    '<button class="go" type="button" data-act="camp">Wake on the quay once more, knowing what you know</button>' +
+    othersHtml() + '<button class="go" type="button" data-act="camp">Wake on the quay once more, knowing what you know</button>' +
     '<button class="quiet" type="button" data-act="reset">' + (sure ? 'Sure? This forgets every waking.' : 'Forget everything and start as a stranger') + '</button>';
 }
 function renderSheet() {
@@ -2584,7 +2634,7 @@ function screenHtml() {
     (sl ? '<p class="note">' + esc(SLOT_NAME[STORE.active] + ': ' + slotLine(sl)) + '</p>' : '') +
     '<div class="menu"><button class="go" type="button" data-act="play">' + (sl ? 'Continue' : 'Begin') + '</button><button class="choice" type="button" data-act="saves">Saved games</button><button class="choice" type="button" data-act="help">How it works</button></div>' +
     '<p class="ver">Version 0.14. The game saves itself in this browser after every choice.</p>' +
-    (typeof gtag === 'function' ? '<p class="ver">This page counts plays anonymously. It does not know who you are.</p>' : '') +
+    (typeof gtag === 'function' || FB ? '<p class="ver">This page counts plays, and keeps a note of your archer\'s name and how far he got, so the author can see how the game plays. It does not know who you are.</p>' : '') +
     '<p class="ver">© 2026 Neil Fletcher. Found something broken or odd? <a href="https://github.com/neilfletcher/until-crispins-day-play/issues" target="_blank" rel="noopener">Tell me here</a>.</p>';
   if (view === 'menu') return '<p class="eyebrow"><span>' + esc(SLOT_NAME[STORE.active]) + '</span></p><h2>Menu</h2><div class="menu">' +
     '<button class="go" type="button" data-act="resume">Back to the game</button>' +
