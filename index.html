@@ -1920,6 +1920,7 @@ function newRun() {
     q('m_open', '8 October'), q('T', '11 October', 'march'), q('I', '13 October', 'march'), q('home_m', '15 October'), q('T', '17 October', 'march'), q('somme', '19 October'), q('fire_m', '23 October'),
     q('T', '24 October', 'eve'), q('I', '24 October', 'eve'), q('night', '24 October'),
     ...['b_wait', 'b_dawn', 'b_horse', 'BM', 'b_advance', 'b_close', 'BM', 'b_melee', 'b_hero', 'b_order'].map(x => q(x, '25 October'))];
+  track(M.runs < 1 ? 'game_start' : 'waking_start');
   enter();
 }
 function cur() {
@@ -1986,7 +1987,8 @@ function enter() {
     makeBridge();
     if (!S.chap) { S.chap = {}; ACTS.slice(0, ACTS.indexOf(S.act) + (S.i > 0 ? 1 : 0)).forEach(a => { S.chap[a] = 1; }); }
     const opens = sc.act !== 'any' && sc.id !== 'origin' && CHAPTER[sc.act] && !S.chap[sc.act];
-    if (opens) { S.chap[sc.act] = 1; M.chapSeen = M.chapSeen || {}; S.chapFull = !M.chapSeen[sc.act] && (M.runs < 1 || ACTS.indexOf(sc.act) > prevFar); M.chapSeen[sc.act] = 1; }
+    track('scene_view', { scene: sc.id, act: sc.act });
+    if (opens) { track('reached_' + sc.act); S.chap[sc.act] = 1; M.chapSeen = M.chapSeen || {}; S.chapFull = !M.chapSeen[sc.act] && (M.runs < 1 || ACTS.indexOf(sc.act) > prevFar); M.chapSeen[sc.act] = 1; }
     S.phase = opens ? 'chapter' : 'choose'; S.result = null;
     return;
   }
@@ -2103,11 +2105,19 @@ const WANT_ASK = {
   pardon: 'have kept Hawkin alive at Harfleur, and had your name entered on the pardon roll on the march',
   vow: "have left your offering at the cobblers' altar in Southampton, and heard out the man from Soissons on the march"
 };
+/* Anonymous play counts. Only the public release loads the analytics tag; everywhere else this does nothing. */
+function track(name, p) { try { if (typeof gtag === 'function') gtag('event', name, Object.assign({ waking: M ? M.runs + (S && S.banked ? 0 : 1) : 0, version: '0.13' }, p || {})); } catch (e) {} }
 function finishRun(how) {
   M.runs++; M.lessons += S.lessons; S.banked = 1;
+  const sc0 = S.queue[S.i] ? S.queue[S.i].id : '', end = how === 'dead' ? (S.flags.wenthome === 'gaveup' ? 'gave_up' : S.flags.wenthome ? 'left' : 'died') : how === 'lived' ? 'survived' : 'saved_duke';
+  track('waking_end', { result: end, act: S.act, scene: sc0, waking: M.runs });
+  track('end_' + end + '_' + S.act, { scene: sc0, waking: M.runs });
+  if (M.runs === 1) track('first_waking_over', { result: end, act: S.act, waking: 1 });
   if (how === 'dead') M.last = S.flags.wenthome === 'gaveup' ? 'because you stopped, which the saints seem to allow' : S.flags.wenthome === 'stay' ? 'in a dry bed behind the walls of Harfleur, of nothing at all' : S.flags.wenthome ? 'in your own bed in Winchester, of nothing at all' : DIED_WHERE[S.act];
   if (how === 'lived') { M.lived = (M.lived || 0) + 1; M.last = 'in your sleep, as far as you can tell, the night after the battle'; }
-  if (how === 'won') { M.wins++; if (!M.wonAt) M.wonAt = M.runs; S.tier = pairDone() ? 'true' : 'hero'; if (S.tier === 'true' && !M.trueAt) M.trueAt = M.runs; }
+  if (how === 'won') { M.wins++; if (!M.wonAt) M.wonAt = M.runs; S.tier = pairDone() ? 'true' : 'hero'; if (S.tier === 'true' && !M.trueAt) M.trueAt = M.runs;
+    track(S.tier === 'true' ? 'ending_true' : 'ending_hero', { waking: M.runs });
+    if (S.tier === 'true' && M.trueAt === M.runs) track('completed_game', { waking: M.runs }); else if (M.wonAt === M.runs) track('first_win', { waking: M.runs }); }
 }
 function endRun(how) {
   if (how === 'lived') S.lessons += 2;
@@ -2357,6 +2367,7 @@ function screenHtml() {
     (sl ? '<p class="note">' + esc(SLOT_NAME[STORE.active] + ': ' + slotLine(sl)) + '</p>' : '') +
     '<div class="menu"><button class="go" type="button" data-act="play">' + (sl ? 'Continue' : 'Begin') + '</button><button class="choice" type="button" data-act="saves">Saved games</button><button class="choice" type="button" data-act="help">How it works</button></div>' +
     '<p class="ver">Version 0.13. The game saves itself in this browser after every choice.</p>' +
+    (typeof gtag === 'function' ? '<p class="ver">This page counts plays anonymously. It does not know who you are.</p>' : '') +
     '<p class="ver">© 2026 Neil Fletcher. Found something broken or odd? <a href="https://github.com/neilfletcher/until-crispins-day-play/issues" target="_blank" rel="noopener">Tell me here</a>.</p>';
   if (view === 'menu') return '<p class="eyebrow"><span>' + esc(SLOT_NAME[STORE.active]) + '</span></p><h2>Menu</h2><div class="menu">' +
     '<button class="go" type="button" data-act="resume">Back to the game</button>' +
