@@ -75,6 +75,7 @@ body[data-view="menu"] .menubtn,body[data-view="saves"] .menubtn,body[data-view=
 .eyebrow{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-family:var(--label);font-size:14px;letter-spacing:.09em;color:var(--ash);margin:0 0 6px}
 .pips{letter-spacing:3px;color:var(--blood);font-size:15px;white-space:nowrap}
 .pips i{font-style:normal;color:#5a5245}
+.pips b{font-family:var(--label);font-weight:500;letter-spacing:.09em;color:var(--ash);font-size:14px;margin-right:4px}
 .story h2{font-family:var(--display);font-weight:400;font-size:clamp(30px,4.6vw,42px);line-height:1.05;margin:0 0 16px;text-wrap:balance}
 .story p{margin:0 0 14px}
 .story p.bridge{font-style:italic;color:var(--ash);border-left:2px solid var(--clay);padding-left:12px}
@@ -178,7 +179,7 @@ const DEATH_LINE = {
   eve: 'You are dead before the battle, which the others will later agree was the clever way to go about it.',
   battle: 'The mud takes you in as though it has been waiting, and it has.'
 };
-const HARD = { soton: 0, harfleur: 2, march: 2, eve: 2, battle: 7 };
+const HARD = { soton: 0, harfleur: 2, march: 2, eve: 2, battle: 6 };
 const STAT = { arm: 'Arm', eye: 'Eye', wits: 'Wits', grit: 'Grit' };
 const ITEM = {
   string:  { n: 'Dry string',         d: 'Waxed hemp, coiled under your cap.' },
@@ -2016,11 +2017,75 @@ scene('s_drill', 'soton', "Cutler's line", `Cutler has the twenty out on the com
     out: [`You have it under your boot and then in your hand, and it is back in his belt before Cutler turns at the end of the line. It costs you your place in the count and one late shot. Perkin looks at you as if you had pulled him out of a river. You tell him to keep his eyes to the front.`, { flag: 'bond', pull: ['perkin', 1], say: 'Perkin will keep close to you.' }] }
 ], { when: () => M.runs < 1 });
 const LINK = {
-  perkin: ['Perkin has not stopped talking since. You have learned the names of all his sisters.', 'Perkin is somewhere behind you, whistling something he cannot get right.', 'You can still hear Perkin two streets off. Everybody can.'],
-  ieuan: ['Ieuan has gone back to his corner and his fletching, and has not said whether he thinks better or worse of you.', 'The Welshman is humming again. It is the same four notes, and he does not seem to know that he does it.', 'Ieuan has said nothing more about it. He seldom says a thing twice.'],
-  cutler: ['Cutler has gone back to counting whatever it is he counts on his fingers.', "You can feel Cutler's eye on your back for the rest of that day. It is not unfriendly. It is not friendly either.", 'Cutler has said nothing since. The twenty tells you that is how a man knows where he stands, if he knows how to read it.'],
-  reeve: ['Reeve nods to you across the loft afterwards, as a man nods to something he has put by for later.', 'You find that you have checked your purse twice since talking to Reeve, and that he has seen you do it both times.', 'Reeve is being pleasant to somebody else now. You watch how he does it.']
+  soton: {
+    perkin: ['Perkin has not stopped talking since. You have learned the names of all his sisters.', 'Perkin is somewhere behind you, whistling something he cannot get right.', 'You can still hear Perkin two streets off. Everybody can.'],
+    ieuan: ['Ieuan has gone back to his corner and his fletching, and has not said whether he thinks better or worse of you.', 'The Welshman is humming again. It is the same four notes, and he does not seem to know that he does it.', 'Ieuan has said nothing more about it. He seldom says a thing twice.'],
+    cutler: ['Cutler has gone back to counting whatever it is he counts on his fingers.', "You can feel Cutler's eye on your back for the rest of that day. It is not unfriendly. It is not friendly either.", 'Cutler has said nothing since. The twenty tells you that is how a man knows where he stands, if he knows how to read it.'],
+    reeve: ['Reeve nods to you across the loft afterwards, as a man nods to something he has put by for later.', 'You find that you have checked your purse twice since talking to Reeve, and that he has seen you do it both times.', 'Reeve is being pleasant to somebody else now. You watch how he does it.'] },
+  harfleur: {
+    perkin: ["Perkin has been put to carrying for the cooks, and comes back smelling of smoke and somebody else's dinner.", 'Perkin has stopped whistling. You notice it, as you would notice a mill stopping.', 'Perkin is asleep sitting up against the trench wall, with his mouth open.'],
+    ieuan: ['Ieuan is sitting on an upturned basket, sorting shafts by weight, as if the guns were weather.', 'The Welshman has found the one dry place in the trench. He always does.', 'Ieuan watches the wall for an hour at a time without moving, as a heron watches water.'],
+    cutler: ['Cutler walks the length of the trench twice a day and touches each man on the shoulder as he passes, counting.', 'Cutler has a tally stick inside his jack now. He does not show it to anyone.', 'Cutler is thinner. He has stopped shouting, and that worries the twenty more than the shouting ever did.'],
+    reeve: ['Reeve has a dry blanket, a full flask and a whole skin. Nobody has seen him do anything to deserve them.', 'Reeve is doing a favour for a serjeant of another company. He does a great many favours.', 'Reeve has gone off down the lines with a sack. He will come back with something in it.'] },
+  march: {
+    perkin: ['Perkin is limping, and pretending not to.', 'Perkin has gone quiet again, and is walking with his eyes on the heels in front.', 'Perkin asks how far it is to Calais. Nobody answers him, so he asks again.'],
+    ieuan: ['Ieuan walks at the same pace up hills and down them, and never seems to arrive tired.', 'The Welshman has cut himself a staff. He says a man with a staff has three legs, and the French have only two.', 'Ieuan is singing under his breath, in Welsh, to the time of his feet.'],
+    cutler: ['Cutler is walking at the rear of the twenty now, where he can see who is falling behind.', 'Cutler counts the twenty at every halt. He does not need to. He does it all the same.', 'Cutler has given his own cloak to somebody. He will not say whom.'],
+    reeve: ['Reeve is chewing something. Nobody else in the twenty has anything to chew.', 'Reeve walks on the outside of the column, where he can see into the ditches.', 'Reeve has a second pair of boots. They are tied round his neck by the laces.'] }
 };
+
+/* ================= v0.16: a proper start to the siege and to the march ================= */
+scene('h_camp', 'harfleur', 'The lines', () => `It takes four days to bring the army round Harfleur and shut it in. The King sits on the hill to the west. His brother Clarence has gone round by a long march to close the east. Between them lies the town: grey walls, a wet ditch, and before the Leure gate a great bulwark of tree trunks and earth that the garrison has thrown up to keep the guns off the gate itself.
+
+The twenty has been given sixty yards of the western lines to dig and to hold, between the gun pits and the marsh. Cutler walks the ground once, from end to end, and then divides it. There are three sorts of work here: digging the trench forward towards the wall, carrying for the gunners, and standing picket at the marsh end, where the ground is too wet to dig and a man can only lie in the reeds and watch.`, [
+  { t: 'Take a spade, next to Ieuan',
+    out: [`Ieuan digs slowly and never stops, and by the end of the day he has shifted twice what the young men have. 'Dig it as if you meant to live in it,' he says. 'You will be.' He shows you how to cut a step to stand on and a shelf to keep a bow off the wet. It is the first thing anyone has taught you in France.`, { pull: ['ieuan', 1], arm: 1 }] },
+  { t: 'Carry for the gunners, with Perkin', if: () => perkinHere(),
+    out: [`The gunners are Dutchmen and Germans, paid more in a week than the twenty is in a quarter, and they treat the guns as other men treat horses. Perkin is frightened of the powder and delighted by everything else. By the end of the day he can swear in Dutch, and you have learned to open your mouth and stop your ears when the master gunner lifts his hand.`, { pull: ['perkin', 1], wits: 1 }] },
+  { t: 'Take the picket at the marsh end, with Reeve', if: () => !S.flags.reeve_enemy,
+    out: [`Reeve has stood picket before a good many towns. He shows you where to lie so that the reeds break your outline, and how to watch a wall by looking to one side of it. He also shows you where a man on picket can sleep without being found. He seems to think the two lessons are of equal worth.`, { pull: ['reeve', 1], eye: 1 }] },
+  { t: 'Ask Cutler where he wants you',
+    out: [`He looks at you for a moment, as if the question were a trick. Then he puts you at the join between the twenty and the Cheshire company on its left. 'That's where it goes wrong,' he says. 'Where one lot ends and the next begins. Keep your eyes open and tell me what you see.' It is a compliment, of the kind he gives.`, { st: 1, pull: ['cutler', 1] }] }
+]);
+scene('h_first', 'harfleur', 'The first stone', () => `The King's guns open on the third day, and the town answers. Nobody in the twenty has been shot at by a gun before, save Ieuan and Reeve, who are lying flat a full breath before anyone else has heard anything.
+
+The stone comes over the trench with a noise like a cart crossing a bridge, and strikes the spoil bank twenty yards along. When the earth has finished falling, one of the two Johns is not there. There is his spade, and a shoe. An hour ago he was four places from you in the line, and you had not yet learned which of the two Johns he was.${perkinHere() ? ' Perkin has gone the colour of tallow.' : ''}`, [
+  { t: 'Go and dig for him, with the others', test: ['grit', 7, 'labour'],
+    win: [`You dig with your hands, since a spade would be worse. You are the one who finds him. He is the first dead man you have ever handled, and he is still warm, which you had not expected. Hodge says the words. Cutler takes a stick from inside his jack and cuts a notch in it, and looks to see who is standing there with earth to the elbows.`, { st: 1 }],
+    lose: [`You get as far as the edge of the fall, and there your legs stop. Hodge moves you to one side, not unkindly, as a man shifts a stool. You stand and watch them dig. It is as much as you can do, and you find that you despise it.`, {}] },
+  { t: 'Stay flat, and learn the sound', test: ['wits', 7],
+    win: [`You make yourself listen to the next one, and the one after. First the cough of the gun, then a count of four, then the cart on the bridge. By the fifth stone you can tell one that is coming to you from one that is going to somebody else. It will not stop a stone. It will, however, tell you when there is no use in lying down.`, { eye: 1 }],
+    lose: [`Every one of them sounds as if it is coming for you by name. You are still lying flat, with your face in the clay, some time after the others have got up and gone back to work.`, {}] },
+  { t: 'Pick up his spade, and go on with the trench',
+    out: [`Somebody has to, and the spade is there. You dig in his place until the light goes. Nobody says anything about it. Cutler, coming along the trench, stops and looks at the spade and at you. 'That's the way of it,' he says, to nobody, and goes on.`, { grit: 1 }] }
+]);
+scene('m_day', 'march', 'The order of march', () => `On the road the army goes in three battles. Sir John Cornwall and Sir Gilbert Umfraville have the van, the King has the main body, and the Duke of York and the Earl of Oxford bring up the rear. The twenty marches with the main battle, in a column four abreast that takes the better part of an hour to pass any given tree.
+
+You walk where Cutler puts you until the first halt. After that men sort themselves out, as they did in the loft at Southampton. Who you walk beside for a hundred and fifty miles is no small thing.`, [
+  { t: 'Fall in beside Ieuan',
+    out: [`Ieuan walks at one pace, up hill and down, and does not talk while he is walking. At the halts he does not sit. He drinks, eases his pack, looks at his feet and is ready before the trumpet. You copy him, having no better idea, and at the end of the day you are less tired than men twice your size.`, { pull: ['ieuan', 1], heal: 1 }] },
+  { t: 'Fall in beside Perkin', if: () => perkinHere(),
+    out: [`He has been waiting for you to. He talks for the first five miles, and then, for the first time since you have known him, he stops. After a while he says that he would like to see the bakehouse again. You say that he will. Neither of you looks at the other, and you both walk a little faster.`, { flag: 'bond', pull: ['perkin', 1], say: 'Perkin will keep close to you.' }] },
+  { t: 'Walk at the head of the twenty, behind Cutler',
+    out: [`From here you can see what he sees: who is lame, who is carrying too much, who has not spoken since the gate. He says nothing to you all day. At the last halt he hands you his water skin without looking round, and you take it to be filled.`, { st: 1, pull: ['cutler', 1] }] },
+  { t: 'Drop back to the rear, with Reeve', if: () => !S.flags.reeve_enemy,
+    out: [`'This is where a wise man walks,' Reeve says. 'Things fall off carts, and men throw away what they will want tomorrow.' By the last halt he has a cooking pot, a good cloak and a ham bone, and you have threepence that somebody dropped and a much clearer idea of how he has lived through twenty years of this.`, { c: 3, pull: ['reeve', 1] }] },
+  { t: 'Walk by yourself, and keep your own counsel',
+    out: [`You find a place in the column where nobody expects you to talk, and you give your mind to the road: the weight of the pack, the heel of the man in front, the count of your own steps. It is dull. All the same, by the end of it you know what your legs will do, and that is worth knowing early.`, { grit: 1 }] }
+]);
+scene('m_eighth', 'march', 'The eighth day', () => `The King told the army to carry food for eight days, and this is the eighth. By the reckoning made at Harfleur you should be within sight of Calais. You are, in fact, further from Calais than you were four days ago, and marching the wrong way up a river that you cannot cross.
+
+Cutler shares out what is left in the company sack. It comes to a strip of dried beef and half a biscuit for each man. Then he turns the sack inside out and shakes it, so that everybody can see.`, [
+  { t: 'Eat it now, all of it',
+    out: [`You eat it standing up, slowly, and you lick your fingers after. Tomorrow will have to see to itself. It is the best strip of beef you have ever tasted, and you say so, and for a wonder it gets a laugh.`, { heal: 1 }] },
+  { t: 'Put the biscuit by for tomorrow',
+    out: [`You eat the beef and fold the biscuit into your hood. Tomorrow, when the twenty has nothing at all, you have half a biscuit, and you learn exactly what half a biscuit is worth to a man who has none. It is not a comfortable thing to learn, but it stays learned.`, { wits: 1 }] },
+  { t: 'Give yours to Perkin, who is still growing', if: () => perkinHere(),
+    out: [`He says no, and then he takes it, and eats it with his back turned. He is sixteen and has been hungry since the Bresle. The twenty sees you do it. Nobody says anything, though Hodge moves over at the fire to give you the warm side.`, { st: 1, flag: 'bond', pull: ['perkin', 1], say: 'Perkin will keep close to you.' }] },
+  { t: 'Ask Cutler what happens on the ninth day', test: ['wits', 7, 'talk'],
+    win: [`'We walk,' he says. Then, since you asked it quietly, he tells you the rest. He has been hungry in France before. Men last longer without food than they expect to. It is the feet that go first, and after the feet, the temper. 'Keep both,' he says, 'and I'll get you there.' You notice that he does not say where.`, { grit: 1, pull: ['cutler', 1] }],
+    lose: [`'On the ninth day, cobbler,' Cutler says, 'I stop answering questions.' He has had a great many of them since the sack came out.`, {}] }
+]);
 
 /* ================= v0.10: other versions of the scenes every waking passes through ================= */
 const ALT = {
@@ -2165,8 +2230,14 @@ function newRun() {
       ? [q('wake', '1 August'), q('s_billet', '1 August'), q('s_drill', '2 August'), q('T', '3 August', 'soton'), q('I', '4 August', 'soton'), q('home_s', '5 August'), q('I', '7 August', 'soton'), q('T', '8 August', 'soton')]
       : [q('wake', '1 August'), q('T', '3 August', 'soton'), q('I', '5 August', 'soton'), q('home_s', '7 August'), q('T', '9 August', 'soton')]),
     q('fire_s', '10 August'), q('sail', '11 August'),
-    q('landing', '14 August'), q('T', '21 August', 'harfleur'), q('I', '28 August', 'harfleur'), q('home_h', '4 September'), q('T', '11 September', 'harfleur'), q('fire_h', '17 September'), q('flux', '22 September'),
-    q('m_open', '8 October'), q('T', '11 October', 'march'), q('I', '13 October', 'march'), q('home_m', '15 October'), q('T', '17 October', 'march'), q('somme', '19 October'), q('fire_m', '23 October'),
+    ...((M.far || 0) < 1
+      ? [q('landing', '14 August'), q('h_camp', '18 August'), q('h_first', '21 August'), q('T', '24 August', 'harfleur'), q('I', '28 August', 'harfleur'), q('home_h', '4 September'), q('I', '8 September', 'harfleur'), q('T', '11 September', 'harfleur')]
+      : [q('landing', '14 August'), q('T', '21 August', 'harfleur'), q('I', '28 August', 'harfleur'), q('home_h', '4 September'), q('T', '11 September', 'harfleur')]),
+    q('fire_h', '17 September'), q('flux', '22 September'),
+    ...((M.far || 0) < 2
+      ? [q('m_open', '8 October'), q('m_day', '9 October'), q('T', '11 October', 'march'), q('I', '12 October', 'march'), q('I', '14 October', 'march'), q('home_m', '15 October'), q('m_eighth', '16 October'), q('T', '17 October', 'march')]
+      : [q('m_open', '8 October'), q('T', '11 October', 'march'), q('I', '13 October', 'march'), q('home_m', '15 October'), q('T', '17 October', 'march')]),
+    q('somme', '19 October'), q('fire_m', '23 October'),
     q('T', '24 October', 'eve'), q('home_e', '24 October'), q('I', '24 October', 'eve'), q('night', '24 October'),
     ...['b_wait', 'b_dawn', 'b_horse', 'BM', 'b_advance', 'b_close', 'BM', 'b_melee', 'b_hero', 'b_order'].map(x => q(x, '25 October'))];
   track(M.runs < 1 ? 'game_start' : 'waking_start');
@@ -2213,8 +2284,8 @@ function makeBridge() {
   if (k >= 0) out.push(S.echo.splice(k, 1)[0].t);
   if (S.hurt < 0 && S.blood > 0) out.push(S.blood === 1 ? LOW : WOUNDS[(S.idle++) % WOUNDS.length]);
   else if (!out.length && M.want && (S.act === 'soton' || S.act === 'harfleur') && S.i > 4 && rnd() < 0.3) { S.said = S.said || {}; const pool = (IDLE[M.want] || []).map((l, n) => [l, n]).filter(([, n]) => !S.said[n]); if (pool.length) { const [l, n] = pool[Math.floor(rnd() * pool.length)]; S.said[n] = 1; out.push(typeof l === 'function' ? l() : l); } }
-  if (!out.length && S.act === 'soton' && S.prevWith && LINK[S.prevWith] && S.prevWith !== S.withWho && (S.prevWith !== 'perkin' || perkinHere()) && rnd() < 0.7) { S.days = S.days || {}; const pool = LINK[S.prevWith].map((l, n) => [l, n]).filter(([, n]) => !S.days['l' + S.prevWith + n]); if (pool.length) { const [l, n] = pool[Math.floor(rnd() * pool.length)]; S.days['l' + S.prevWith + n] = 1; out.push(l); } }
-  const cid = S.queue[S.i] ? S.queue[S.i].id : '', close = cid === 's_billet' || cid === 's_drill' || (S.i > 0 && S.queue[S.i - 1] && S.queue[S.i].d === S.queue[S.i - 1].d);
+  if (!out.length && LINK[S.act] && S.prevWith && LINK[S.act][S.prevWith] && S.prevWith !== S.withWho && (S.prevWith !== 'perkin' || perkinHere()) && rnd() < 0.7) { S.days = S.days || {}; const pool = LINK[S.act][S.prevWith].map((l, n) => [l, n]).filter(([, n]) => !S.days['l' + S.act + S.prevWith + n]); if (pool.length) { const [l, n] = pool[Math.floor(rnd() * pool.length)]; S.days['l' + S.act + S.prevWith + n] = 1; out.push(l); } }
+  const cid = S.queue[S.i] ? S.queue[S.i].id : '', close = cid === 's_billet' || cid === 's_drill' || cid === 'h_camp' || cid === 'h_first' || cid === 'm_day' || cid === 'm_eighth' || (S.i > 0 && S.queue[S.i - 1] && S.queue[S.i].d === S.queue[S.i - 1].d);
   if (!out.length && !close && DAYS[S.act] && S.i > 1 && S.phase !== 'chapter' && rnd() < 0.5) { S.days = S.days || {}; const pool = DAYS[S.act].map((l, n) => [l, n]).filter(([, n]) => !S.days[S.act + n]); if (pool.length) { const [l, n] = pool[Math.floor(rnd() * pool.length)]; S.days[S.act + n] = 1; out.push(l); } }
   S.hurt = 0; S.bridge = out.join(' ');
 }
@@ -2360,7 +2431,7 @@ const WANT_ASK = {
   vow: "have left your offering at the cobblers' altar in Southampton, and heard out the man from Soissons on the march"
 };
 /* Anonymous play counts. Only the public release loads the analytics tag; everywhere else this does nothing. */
-function track(name, p) { try { if (typeof gtag === 'function') gtag('event', name, Object.assign({ waking: M ? M.runs + (S && S.banked ? 0 : 1) : 0, version: '0.15' }, p || {})); } catch (e) {} }
+function track(name, p) { try { if (typeof gtag === 'function') gtag('event', name, Object.assign({ waking: M ? M.runs + (S && S.banked ? 0 : 1) : 0, version: '0.16' }, p || {})); } catch (e) {} }
 /* The author's record of how games go. Only the public release has the settings for it; everywhere else this does nothing. */
 const FB = {"projectId": "until-crispins-day", "apiKey": "AIzaSyC8t1QwGPsrX5cJ6TzwcXrVU6s4rzvFJnU"};
 function fbv(v) {
@@ -2376,7 +2447,7 @@ function report() {
     if (!M.pid) M.pid = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
     if (!M.startedAt) M.startedAt = new Date().toISOString();
     const seen = M.seen || {};
-    const doc = { name: String(M.name || '').slice(0, 30), want: M.want || '', version: '0.15', started: M.startedAt, updated: new Date().toISOString(),
+    const doc = { name: String(M.name || '').slice(0, 30), want: M.want || '', version: '0.16', started: M.startedAt, updated: new Date().toISOString(),
       runs: M.runs || 0, far: M.far || 0, wins: M.wins || 0, wonAt: M.wonAt || 0, trueAt: M.trueAt || 0, lived: M.lived || 0,
       scenes: Object.values(seen).reduce((a, b) => a + b, 0), seen: seen, ends: M.ends || {}, lastEnd: M.lastEnd || '', found: Object.keys(M.how || {}).length };
     const f = {}; Object.keys(doc).forEach(k => { f[k] = fbv(doc[k]); });
@@ -2463,7 +2534,7 @@ function load() { try { const d = JSON.parse(localStorage.getItem(KEY) || 'null'
 const titleOf = sc => typeof sc.title === 'function' ? sc.title() : sc.title;
 const paras = t => t.split('\n\n').map(p => '<p>' + esc(p) + '</p>').join('');
 function fxList(L) { return L.length ? '<ul class="fx">' + L.map(([t, k]) => '<li class="' + k + '">' + esc(t) + '</li>').join('') + '</ul>' : ''; }
-function pips() { let s = ''; for (let k = 0; k < S.maxBlood; k++) s += k < S.blood ? '●' : '<i>●</i>'; return '<span class="pips" aria-label="Blood ' + Math.max(0, S.blood) + ' of ' + S.maxBlood + '">' + s + '</span>'; }
+function pips() { let s = ''; for (let k = 0; k < S.maxBlood; k++) s += k < S.blood ? '●' : '<i>●</i>'; return '<span class="pips" aria-label="Blood ' + Math.max(0, S.blood) + ' of ' + S.maxBlood + '"><b aria-hidden="true">Blood</b> ' + s + '</span>'; }
 const standingWord = n => n >= 6 ? "one of Cutler's own" : n >= 3 ? 'a man who stands' : n >= 1 ? 'a name on the roll' : 'a mouth to feed';
 
 const CHAPTER = {
@@ -2673,7 +2744,7 @@ function screenHtml() {
     paras(sl && sl.M.runs >= 1 ? `You are a cordwainer's apprentice with a borrowed bow, the twentieth man in a company of twenty archers. You have died in France, and woken on the quay at Southampton with all of it still in your head. Something is wanted of you. You do not yet know what it is.` : `It is August 1415. The King is taking an army to France, and you have taken his sixpence. You know nothing about war, and you are about to learn.`) +
     (sl ? '<p class="note">' + esc(SLOT_NAME[STORE.active] + ': ' + slotLine(sl)) + '</p>' : '') +
     '<div class="menu"><button class="go" type="button" data-act="play">' + (sl ? 'Continue' : 'Begin') + '</button><button class="choice" type="button" data-act="saves">Saved games</button><button class="choice" type="button" data-act="help">How it works</button></div>' +
-    '<p class="ver">Version 0.15. The game saves itself in this browser after every choice.</p>' +
+    '<p class="ver">Version 0.16. The game saves itself in this browser after every choice.</p>' +
     (typeof gtag === 'function' || FB ? '<p class="ver">This page counts plays, and keeps a note of your archer\'s name and how far he got, so the author can see how the game plays. It does not know who you are.</p>' : '') +
     '<p class="ver">© 2026 Neil Fletcher. Found something broken or odd? <a href="https://github.com/neilfletcher/until-crispins-day-play/issues" target="_blank" rel="noopener">Tell me here</a>.</p>';
   if (view === 'menu') return '<p class="eyebrow"><span>' + esc(SLOT_NAME[STORE.active]) + '</span></p><h2>Menu</h2><div class="menu">' +
