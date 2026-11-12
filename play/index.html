@@ -3346,7 +3346,7 @@ const WANT_ASK = {
   vow: "have left your offering at the cobblers' altar in Southampton, and heard out the man from Soissons on the march"
 };
 /* Anonymous play counts. Only the public release loads the analytics tag; everywhere else this does nothing. */
-function track(name, p) { try { if (typeof gtag === 'function') gtag('event', name, Object.assign({ waking: M ? M.runs + (S && S.banked ? 0 : 1) : 0, version: '0.31' }, p || {})); } catch (e) {} }
+function track(name, p) { try { if (typeof gtag === 'function') gtag('event', name, Object.assign({ waking: M ? M.runs + (S && S.banked ? 0 : 1) : 0, version: '0.32' }, p || {})); } catch (e) {} }
 /* The author's record of how games go. Only the public release has the settings for it; everywhere else this does nothing. */
 const FB = {"projectId": "until-crispins-day", "apiKey": "AIzaSyC8t1QwGPsrX5cJ6TzwcXrVU6s4rzvFJnU"};
 function fbv(v) {
@@ -3362,7 +3362,7 @@ function report() {
     if (!M.pid) M.pid = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
     if (!M.startedAt) { M.startedAt = new Date().toISOString(); M.preRuns = M.runs || 0; }
     const seen = M.seen || {};
-    const doc = { name: String(M.name || '').slice(0, 30), want: M.want || '', version: '0.31', started: M.startedAt, updated: new Date().toISOString(),
+    const doc = { name: String(M.name || '').slice(0, 30), want: M.want || '', version: '0.32', started: M.startedAt, updated: new Date().toISOString(),
       runs: M.runs || 0, far: M.far || 0, wins: M.wins || 0, wonAt: M.wonAt || 0, trueAt: M.trueAt || 0, lived: M.lived || 0,
       scenes: Object.values(seen).reduce((a, b) => a + b, 0), seen: seen, ends: M.ends || {}, lastEnd: M.lastEnd || '', pre: M.preRuns || 0, found: Object.keys(M.how || {}).length };
     const f = {}; Object.keys(doc).forEach(k => { f[k] = fbv(doc[k]); });
@@ -3601,7 +3601,8 @@ ${wantEnd()}
 You lie down that night in the barn at Maisoncelle and you are afraid to close your eyes. When you open them, there is straw. There is frost on the dead in the field, and somebody is frying bacon, and it is the twenty-sixth of October. ${S.tier === 'true' ? 'You look in your fist for the awl and it is gone. Your boots are whole, and they are your own work.' : 'Your boots have a hole in them. You look in your fist for the awl and it is gone.'}`) +
     (S.tier === 'true' ? '<p class="note">It took you ' + M.runs + ' wakings to finish the pair. There is nothing left undone.</p>' : '<p class="note">It took you ' + M.wonAt + ' ' + (M.wonAt === 1 ? 'waking' : 'wakings') + ' to reach the day after St Crispin\'s. The day holds. Your own work is not finished.</p>' + wantedHtml()) +
     (S.oath && oathOf(S.oath) ? '<p class="note">' + (S.oathKept ? 'You swore ' + oathOf(S.oath).n.charAt(0).toLowerCase() + oathOf(S.oath).n.slice(1) + ', and you kept it.' + (S.oathKept === 2 ? ' The two at the bench have noted it: 4 lessons.' : '') : 'You swore ' + oathOf(S.oath).n.charAt(0).toLowerCase() + oathOf(S.oath).n.slice(1) + '. It was not kept.') + '</p>' : '') +
-    othersHtml() + '<button class="go" type="button" data-act="camp">Wake on the quay once more, knowing what you know</button>' +
+    othersHtml() + '<p class="ver">If the day was worth your time, you can <a href="' + COFFEE + '" target="_blank" rel="noopener">buy me a coffee</a>. The game is free either way.</p>' +
+    '<button class="go" type="button" data-act="camp">Wake on the quay once more, knowing what you know</button>' +
     '<button class="quiet" type="button" data-act="reset">' + (sure ? 'Sure? This forgets every waking.' : 'Forget everything and start as a stranger') + '</button>';
 }
 function renderSheet() {
@@ -3738,13 +3739,14 @@ function screenHtml() {
     paras(sl && sl.M.runs >= 1 ? `You are a cordwainer's apprentice with a borrowed bow, the twentieth man in a company of twenty archers. You have died in France, and woken on the quay at Southampton with all of it still in your head. Something is wanted of you. You do not yet know what it is.` : `It is August 1415. The King is taking an army to France, and you have taken his sixpence. You know nothing about war, and you are about to learn.`) +
     (sl ? '<p class="note">' + esc(SLOT_NAME[STORE.active] + ': ' + slotLine(sl)) + '</p>' : '') +
     '<div class="menu"><button class="go" type="button" data-act="play">' + (sl ? 'Continue' : 'Begin') + '</button><button class="choice" type="button" data-act="saves">Saved games</button><button class="choice" type="button" data-act="help">How it works</button>' + sndButton() + sizeButton() + '</div>' +
-    '<p class="ver">Version 0.31. The game saves itself in this browser after every choice.</p>' +
+    '<p class="ver">Version 0.32. The game saves itself in this browser after every choice.</p>' +
     (typeof gtag === 'function' || FB ? '<p class="ver">This page counts plays, and keeps a note of your archer\'s name and how far he got, so the author can see how the game plays. It does not know who you are.</p>' : '') +
-    '<p class="ver">© 2026 Neil Fletcher.</p>';
+    '<p class="ver">© 2026 Neil Fletcher. The game is free. If you like it, you can <a href="' + COFFEE + '" target="_blank" rel="noopener">buy me a coffee</a>.</p>';
   if (view === 'menu') return '<p class="eyebrow"><span>' + esc(SLOT_NAME[STORE.active]) + '</span></p><h2>Menu</h2><div class="menu">' +
     '<button class="go" type="button" data-act="resume">Back to the game</button>' +
     '<button class="choice" type="button" data-act="saves">Saved games<div class="tags"><span>save, load, copy or delete a game</span></div></button>' +
     '<button class="choice" type="button" data-act="help">How it works</button>' + sndButton() + sizeButton() +
+    '<a class="choice" href="' + COFFEE + '" target="_blank" rel="noopener" style="display:block;text-decoration:none;color:inherit">Buy me a coffee<div class="tags"><span>the game is free; this goes to the author, through PayPal</span></div></a>' +
     (M ? '<button class="choice" type="button" data-act="codex">What you have seen<div class="tags"><span>people, places and endings found so far</span></div></button>' : '') +
     (inRun ? '<button class="choice" type="button" data-act="giveup">' + (sureKey === 'giveup' ? 'Sure? Press again to give up this waking.' : 'Give up this waking') + '<div class="tags"><span>wake on the quay now, keeping the lessons earned so far</span></div></button>' : '') +
     '<button class="choice" type="button" data-act="wipe">' + (sureKey === 'wipe' ? 'Sure? Press again. This erases the game in play.' : 'Start this game again from nothing') + '<div class="tags"><span class="dead">' + (M && M.runs >= 1 ? 'erases this game: wakings, lessons and memories' : 'erases this game') + '</span></div></button>' +
@@ -3856,6 +3858,7 @@ function sndToggle() {
 let textSize = 0;
 try { textSize = Math.max(0, Math.min(2, Number(localStorage.getItem('until-crispins-day-size')) || 0)); } catch (e) { /* no storage */ }
 const sizeButton = () => '<button class="choice" type="button" data-act="size">Text size: ' + ['normal', 'large', 'larger'][textSize] + '</button>';
+const COFFEE = 'https://www.paypal.com/donate/?business=paypal%40trooperlooper.co.uk&amp;currency_code=GBP&amp;amount=3&amp;item_name=Until+Crispin%27s+Day';
 const sndButton = () => '<button class="choice" type="button" data-act="sound" aria-pressed="' + (SND.on ? 'true' : 'false') + '">Sound: ' + (SND.on ? 'on' : 'off') + '<div class="tags"><span>' + (SND.on ? 'rain, wind and a bell; turn it off here' : 'rain, wind and a bell, made by the page itself') + '</span></div></button>';
 function render() {
   document.body.dataset.view = view; document.body.dataset.size = textSize; sndRender();
