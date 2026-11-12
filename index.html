@@ -1171,6 +1171,8 @@ scene('b_wait', 'battle', 'Before the light', () => `Cutler kicks the twenty awa
     out: [`The young Earl's company is forming on the right, by the Tramecourt wood. Dickon is in the second rank, pale under his beard. He grips your arm. 'If it goes bad,' he says, 'I'm on the right, under the Earl's banner. Come and find me.' He means, come and find my body. Neither of you says it.`, { eye: 1, flag: 'dickon_near' }] },
   { t: "Find Dickon, and make him swear to stand well left of the Earl's banner", know: 'k_suffolk', if: () => S.flags.dickon_lives,
     out: [`'Left,' Dickon says. 'Why left?' You tell him the banner will draw them. You tell him the young Earl means to be a hero and will be dead before the day is half done, and that every man within ten paces of him will go down with him. He stares at you. 'You're guessing.' You look at him. He stops arguing. 'Left,' he says. 'God's teeth. All right. Left.'`, { flag: 'dickon_safe', say: 'Dickon will stand clear of the banner.' }] },
+  { t: 'Go to the rear, with the baggage guard', if: () => !S.flags.cutler_knows,
+    out: [`Cutler has been told to send a man back to Maisoncelle, to stand guard over the carts with the pages and the sick. He has not yet chosen. You go to him before he has to. He looks at you as a man looks at a coin that has come down tails. 'Go on, then,' he says. 'Somebody has to.' The twenty watches you walk away from the line, and you can feel it on your back the whole way to the village.`, { flag: 'baggage', say: 'You are posted to the baggage, a mile behind the line.' }] },
   { t: 'Take the Host, and keep to yourself',
     out: [`The wafer is damp and tastes of nothing. You have taken it on this morning before, and died on some of them, and you do not know what that makes it. You kneel in the furrow a moment longer than the others do. Then you get up and string your bow.`, { grit: 1, heal: 1 }] }
 ]);
@@ -2142,6 +2144,115 @@ scene('boon_friar', 'march', 'What the friar knows', `The Franciscan from the qu
     out: [`He laughs so that the men in front turn round. Then he counts sixpence into your hand from the purse under his habit. 'An archer gave me that at Harfleur, to pray for him,' he says. 'He no longer needs the prayers, and you need the sixpence. I shall tell the saints it was the same thing.'`, { c: 6 }] }
 ], { enter: () => offer('friar', 4, has('badge')) });
 
+/* ================= v0.18: the battle as a set piece. Wing, centre and baggage each have their own sequence ================= */
+scene('bg_carts', 'battle', 'The carts', `Maisoncelle is a church, a dozen houses and a great park of carts, with the army's horses picketed behind it in thousands, since every man who can fight today is fighting on foot. The guard is thirty pages, a few priests, the sick, and you.
+
+From the churchyard wall you can see the back of the English line a mile off: a thin dark thread across the plough. Beyond it you can see nothing, since the French fill everything beyond it. For a long time nothing happens. Then, quite small with distance, comes a shout taken up by thousands of men, and the thread begins to move away from you.
+
+The King's own baggage is here: his beds, his plate, the chests under the royal seal. So is the twenty's sack, and in it the purse of every man you know.`, [
+  { t: 'Climb the church tower, and watch', test: ['eye', 6],
+    win: [`From up here you see what nobody in it will ever see: the wedges of archers, the horse breaking on the wings, the whole French host pressed between the two woods like corn in a funnel. You see where it narrows. You see that whatever is decided today will be decided in the middle, under the one banner that has not moved. It is a thing worth knowing, and you are a mile from being able to use it.`, { learn: 'k_centre', wits: 1 }],
+    lose: [`There is a mist coming off the plough, or smoke, or the breath of thirty thousand men. You can make out that something very large is happening. You cannot make out what.`, {}] },
+  { t: 'Walk the carts, and see what there is to guard',
+    out: [`It takes you a quarter of an hour, and at the end of it you know three things. The pages are children. The priests have never held anything heavier than a chalice. And the lane that comes in from the north, out of the trees, has nobody watching it at all. You move a cart across it. That is all one man can do.`, { eye: 1 }] },
+  { t: 'Sit down with the sick, out of the wind',
+    out: [`There is a fire, of a kind, in the lee of the church. You sit by it among men who are too ill to care who wins. A page of about nine asks whether you are a real archer. You tell him that you were one yesterday.`, { heal: 1 }] }
+]);
+scene('bg_raid', 'battle', 'The lord of the place', `They come out of the trees on the north side while every eye in the village is on the battle: some hundreds of the country people, with flails and billhooks, and at their head three men in harness on good horses. One of the pages says it is the lord of Agincourt himself, come to see what the English have left in his village.
+
+They are not here to fight. They are here to rob, and they go at the carts as starlings go at a threshing floor. The priests run for the church. The pages run in every direction at once.`, [
+  { t: "Stand on the King's cart with your bow", arrows: 1, test: ['eye', 9, 'shoot'],
+    win: [`You put a shaft into the first man who lays a hand on the sealed chest, and another into the second. They are robbers and not soldiers, and there are easier carts. They go round you. A crown in its case goes off on somebody's shoulder, and a sword of state, and the King's beds. But the chest you are standing on is still there when they have gone, and a chamberlain with a cut head is writing down your name.`, { st: 2, c: 6, learn: 'k_baggage' }],
+    lose: [`A flail takes the bow out of your hands and a second one takes your feet from under you. You lie beneath the cart and watch through the wheel as they carry off the King's crown in its case, as carefully as a man carries eggs.`, { b: -1, learn: 'k_baggage' }] },
+  { t: "Get the twenty's sack and the pages into the church", test: ['wits', 7],
+    win: [`You have the sack over your shoulder and six small boys in front of you, and you get all of it through the church door, and the door barred, before the first of them reaches the porch. They try it once with a billhook and go off after softer things. Every penny the twenty owns is under your feet. You sit down on it.`, { st: 2, flag: 'bag_sack', learn: 'k_baggage' }],
+    lose: [`You get the boys in. The sack is another matter: a man with a flail has it before you do, and he is twice your weight and in a hurry. You watch the twenty's pay go up the north lane on a Picard's back.`, { st: 1, learn: 'k_baggage' }] },
+  { t: 'Take a horse, and ride for the line with the news', test: ['grit', 8],
+    win: [`You have not sat a horse since you were ten, and this one knows it. But it runs the right way, which is all you ask of it. You come up behind the King's battle shouting that they are in the baggage. A knight turns his head. Then the word is going forward through the ranks faster than you could carry it.`, { flag: 'bag_ran', learn: 'k_baggage' }],
+    lose: [`The horse puts you off in the plough half a mile short. You run the rest, in mud to the shins, and arrive behind the line with no breath to say what you came to say. Somebody else is already saying it.`, { b: -1, flag: 'bag_ran', learn: 'k_baggage' }] }
+]);
+scene('bg_word', 'battle', () => S.flags.bag_ran ? 'Behind the banner' : 'What it cost', () => S.flags.bag_ran
+  ? `You are standing behind the King's battle with your hands on your knees when the day ends. The field in front is a wall of dead. A third French battle is sitting its horses at the far end, and it has begun to stir. Round the King there are men shouting about the baggage, and he is not looking at any of them. He is looking at the prisoners.
+
+You brought that news. You brought it as fast as you could, and you have a feeling, as he turns to give an order, that you are about to see what it was worth.`
+  : `The lord of Agincourt and his people are gone, and half the carts with them. From the churchyard you hear a new sound from the field: not the roar of before, but something thinner, which goes on for some time and then stops.
+
+Men will tell you afterwards what it was. The King heard that his baggage was taken and saw the last French battle stirring, and he ordered the prisoners killed. You sit among the broken chests and understand that what happened here, with flails and three men on horses, was the reason for what happened there.`, [
+  { t: 'Find Cutler and the twenty', if: () => !!S.flags.bag_ran,
+    out: [`They are forty paces off, most of them, black to the eyes. Cutler looks at you, and at the mud on you, and at the direction you have come from. 'You were sent to the carts,' he says. You tell him about the carts. He shuts his eyes for a moment. Then he tells you to fall in.`, {}] },
+  { t: 'Stay where you are, and watch the banner', if: () => !!S.flags.bag_ran,
+    out: [`From here you can see how close it came. The ground before the King's banner is the worst on the field. The King's brother is being carried back from it on a door, alive, and a squire lies dead where he fell. Whatever was wanted of this day was wanted there, an hour ago, and you were a mile off, holding a horse.`, { learn: 'k_centre' }] },
+  { t: 'Help the priests with the hurt pages', if: () => !S.flags.bag_ran,
+    out: [`There are four of them, and one is very bad. You do what the priest tells you. You hold a basin, and then you hold a hand. It is not what you came to France to do. It is, as it turns out, the only thing you have done in France that you would do again without being asked.`, { grit: 1 }] },
+  { t: "Go through what is left, for the twenty's things", if: () => !S.flags.bag_ran,
+    out: [() => S.flags.bag_sack ? `The sack is where you left it, under the font, with the priest sitting on it. Every knot is as Cutler tied it. You carry it down to the field yourself, and you put it into his hands, and for once he has nothing to say at all.` : `You find Ieuan's spare bowstave snapped across a wheel, and Hodge's blanket, and a boot. Under a tilted cart there is a purse that the robbers missed, with nobody's mark on it. You tell yourself that you will ask whose it is.`, () => (S.flags.bag_sack ? { st: 1 } : { c: 5 })] },
+  { t: 'Walk down to the field', if: () => !S.flags.bag_ran,
+    out: [`You get there as it is ending. Nobody stops you. The heap before the King's banner is as high as your chest, and the household men are still pulling the living out of it. You stand where the fighting was and look back at Maisoncelle, a mile off, and think about how a man might have got from there to here.`, { learn: 'k_centre' }] }
+]);
+scene('bc_horse', 'battle', 'The horse go by', `Erpingham throws his white baton in the air and shouts something that might be 'Now strike', and five thousand bows come up together. The first flight goes over with a sound like a great cloth tearing.
+
+The French horse come off both wings, and from the wedge beside the King's battle you watch them go for the flanks, where the stakes are. They are fewer than they ought to be, and the plough is up to their hocks. For the space of a few breaths you have what no archer on the wings will have today: the whole side of a charge going past at a hundred paces, and nothing whatever coming at you.`, [
+  { t: 'Shoot into the flank of them as they pass', arrows: 1, test: ['eye', 8, 'shoot cav'],
+    win: [`A horse seen from the side is a barn door. You put four shafts into the same grey, and it swerves across the three behind it, and they go down together in a tangle of legs. What reaches the stakes on the right is no longer a charge. The hurt horses turn, and bolt back through their own men on foot, and you can hear the French line come apart from here.`, { st: 1 }],
+    lose: [`You shoot over them, and then behind them. Then a destrier with no rider and an arrow in its neck comes back along the front of the King's battle, mad with it, and goes through the wedge like a cart through a hedge. You are under it for a moment.`, { b: -1 }] },
+  { t: 'Hold your arrows for the men on foot',
+    out: [`Everybody round you is loosing. You stand with a shaft on the string and do not. Erpingham's serjeant looks at you hard. Then the first French battle starts forward on foot, eight thousand men in plate, and you have a full bag, and the men on either side of you are already feeling for the bottom of theirs.`, { ar: 1 }] },
+  { t: 'Watch the King', test: ['wits', 6],
+    win: [`He has his visor up. He is not looking at the horse at all. He is looking past them, at the men on foot, and you can see his lips move as he counts. On his left is a big fair man who keeps stepping forward of the line and being called back: his brother Gloucester, somebody says. You mark where each of them stands, and how far it is from you.`, { eye: 1 }],
+    lose: [`There is too much going on, and you have never seen a king before. You stare at the crown on the helm like a ploughboy at a fair, and learn nothing from it.`, {}] }
+]);
+scene('bc_press', 'battle', "The King's battle goes back", `The first French battle reaches the English men-at-arms, and the line gives a spear's length all at once, like a door taking a shoulder. You are ten paces from the join.
+
+The French are packed so close that the men in front cannot lift their arms, and the men behind are pushing them on to the English points. The wedge is ordered to shoot into the side of that press, at a distance across which you could throw a stone.`, [
+  { t: 'Shoot into the press, as ordered', arrows: 1, test: ['arm', 8, 'shoot close'],
+    win: [`At this range a bodkin goes through a breastplate as an awl goes through cowhide. You do not aim. There is nothing to aim at, only steel, and you put a shaft into it and take another. The side of the French column curls in on itself, away from the wedge, and the men in it who are trying to turn cannot turn.`, { st: 1, grit: 1 }],
+    lose: [`Your hands are shaking so that two shafts in three go into the mud. A French man-at-arms sees it. He comes out of the side of the press at the wedge with a shortened lance, and it is you he has chosen.`, { b: -1 }] },
+  { t: 'Drop the bow, and go in at the join', test: ['grit', 9, 'melee'],
+    win: [`Where the two lines meet a man is down, and the gap is exactly as wide as he was. You step into it with the mallet. For the length of a few blows you are standing in the King's battle, among men in plate, in a padded jack. Then a household squire shoulders in beside you and fills the place. 'Good lad,' he says, without looking, and you get out from under his feet.`, { st: 2 }],
+    lose: [`The gap closes on you. You are caught between an English shoulder and a French one, with your arms pinned, and something comes down on your head that was not meant for you in particular.`, { b: -2 }] },
+  { t: 'Pull a fallen man clear by his heels',
+    out: [`An English squire is down in the second rank, and men are standing on him. You get him by the ankles and haul him out backwards through the wedge, like a calf out of a ditch. He is alive, and he is somebody's son. When he can speak, he gives you a ring off his finger and tells you to bring it to him at Calais and name your price.`, { c: 6, wits: 1 }] }
+]);
+scene('bm_perkin', 'battle', "Perkin's bag", `Perkin is shooting much too fast. He has loosed a whole sheaf while you have loosed half of one, and most of it has gone into the mud forty paces short of anybody. His eyes are quite round. In another minute he will be standing in the middle of a battle with an empty bag.`, [
+  { t: 'Take him by the belt, and make him wait for the word', test: ['wits', 7, 'talk perkin'],
+    win: [`You get a hand on him and say his name, twice, as you would to a horse. He stops. He breathes. His next shaft takes a man-at-arms in the visor at thirty paces, and he looks down at the bow as if it had spoken to him.`, { grit: 1 }],
+    lose: [`He shakes you off without knowing who you are. He goes on until his fingers find the bottom of the bag, and then he stands there with his hand in it.`, {}] },
+  { t: 'Give him half of yours', if: () => S.arrows >= 1,
+    out: [`You push a fistful of shafts into his belt. He nods, and goes on shooting, a little slower for having been noticed. It will run you short. You find that you do not grudge it.`, { ar: -1, flag: 'bond', say: 'Perkin will keep close to you.' }] },
+  { t: 'Let him be. It is his own bag.',
+    out: [`You have your own work. When you next look round he has thrown the bow down and is holding a stake mallet in both hands, with his back against yours.`, {}] }
+], { bm: 1, when: () => perkinHere() });
+scene('bm_wood', 'battle', 'The Tramecourt wood', `There is movement in the Tramecourt wood, at your right shoulder. They are French, on foot, working round the end of the line through the trees, where the stakes do not reach. There are not many of them. There are enough.`, [
+  { t: 'Go into the trees after them, with whoever will come', test: ['grit', 8, 'melee sneak'],
+    win: [`Four of you go. It is a different kind of fighting under the trees: close, and quiet, and done with knives. They had not expected to be met. When you come out again there are three of you, and nothing is coming round the end of the line.`, { st: 2 }],
+    lose: [`They are men-at-arms, and you are four archers in a wood. You come out of the trees faster than you went in, and one of you does not come out.`, { b: -1 }] },
+  { t: 'Shout it to Cutler, and keep your place',
+    out: [`Cutler looks where you point, and swears, and turns the end file to face the trees. It is enough. The men in the wood see a dozen bows come round on them and decide that there are better ways into the battle.`, { st: 1 }] },
+  { t: 'Shoot at the movement', arrows: 1, test: ['eye', 8, 'shoot'],
+    win: [`You cannot see men. You can see where the hazel moves, and you shoot at that, low. Somebody cries out. The movement stops, and after a while it goes back the way it came.`, { wits: 1 }],
+    lose: [`You put a sheaf into a wood. The wood does not appear to mind.`, {}] }
+], { bm: 1, when: () => !S.flags.centre });
+scene('bm_crown', 'battle', 'The crown', `A knot of French knights has come through the press with one purpose. There are eighteen of them, men will say afterwards, sworn together to reach the King of England or die on the way. One of them gets near enough to swing. You see the blow land on the crowned helm, and a piece of the gold circlet spin away and go into the mud.`, [
+  { t: 'Shoot the man who struck him', arrows: 1, test: ['eye', 9, 'shoot close'],
+    win: [`He has his arm up for the second blow, and the armpit of a harness is mail and nothing more. You put the shaft there. He sits down slowly, like a man who has remembered something, and the household close over him.`, { st: 2 }],
+    lose: [`There are too many backs between you and him, and all of them English. You hold the shaft on the string until your arm shakes, and never get the shot.`, {}] },
+  { t: 'Mark where the gold fell', test: ['wits', 6],
+    win: [`It went in by a dead man's knee, a hand's breadth from a broken lance. When the press has moved on you go and put your fingers into the mud, and there it is: a gold flower the size of a walnut. You give it to a herald, since you can think of nobody you could sell it to who would not hang you. He gives you a noble for it, and a very odd look.`, { c: 8, st: 1 }],
+    lose: [`You look away for a moment, and when you look back there is only mud, and forty men standing in it.`, {}] },
+  { t: 'Close up towards the banner',
+    out: [`The wedge shuffles left without being told to, every man of it, towards the place where the blow fell. Nobody gave the order. You find that you are nearer the banner than you were, and that you have a mallet in your hand, and that you are not as frightened as you had been a moment ago.`, { grit: 1 }] }
+], { bm: 1, when: () => !!S.flags.centre && !!S.played.bc_press });
+scene('bm_second', 'battle', 'The second battle', `The first French battle is a rampart of dead and dying, in places as high as a man's chest. The second is coming on behind it, and has to climb over the first to get at you. For a little while there is nobody to fight. Your arms are trembling. Somebody is passing a helmet full of water along the line.`, [
+  { t: 'Drink, and breathe',
+    out: [`It is ditch water in a dead man's helmet, and it is the best thing you have ever tasted. You breathe until your hands have stopped. The man next to you says, 'Is that it?' and somebody further down tells him, quite kindly, that it is not.`, { heal: 1 }] },
+  { t: 'Go forward, and pull arrows out of the dead', test: ['grit', 7],
+    win: [`You go out in front of the stakes, bent double, and pull. Some come out clean. Some you have to put your foot on. You come back with a sheaf and a half and a clear idea of what an arrow does, which you had managed until now not to have.`, { ar: 1 }],
+    lose: [`One of them is not dead. He has a dagger, and no particular reason to lie still while a cobbler puts a foot on his chest.`, { b: -1 }] },
+  { t: 'Find something heavier on the heap', if: () => !has('maul'), test: ['eye', 6],
+    win: [`There is a lead maul lying by a broken stake, with the owner's hand still round the haft. You take it out of the hand. It is five pounds of dull metal on a yard of ash, and nobody in plate has yet found an answer to it.`, { item: 'maul' }],
+    lose: [`Everything on the heap is either broken or still held. You come back with a dead knight's dagger that turns out to have no point.`, {}] }
+], { bm: 1, when: () => !S.flags.baggage && !!(S.played.b_close || S.played.b_close_b || S.played.bc_press) });
+
 /* ================= v0.10: other versions of the scenes every waking passes through ================= */
 const ALT = {
   sail: ['sail', 'sail_b', 'sail_c'], landing: ['landing', 'landing_b'], m_open: ['m_open', 'm_open_b'], somme: ['somme', 'somme_b'], night: ['night', 'night_b'],
@@ -2348,6 +2459,11 @@ function enter() {
   for (;;) {
     if (S.i >= S.queue.length) return endRun(S.flags.hero ? 'won' : 'lived');
     const e = S.queue[S.i];
+    if (S.flags.baggage) {
+      const swap = { b_dawn: 'bg_carts', b_horse: 'bg_raid', b_advance: 'bg_word' };
+      if (swap[e.id]) e.id = swap[e.id];
+      else if (e.id === 'BM' || e.id === 'b_close' || e.id === 'b_melee' || e.id === 'b_hero' || (e.id === 'b_order' && !S.flags.bag_ran)) { S.i++; continue; }
+    } else if (S.flags.centre) { if (e.id === 'b_horse') e.id = 'bc_horse'; else if (e.id === 'b_close') e.id = 'bc_press'; }
     if (e.id === 'T') e.id = pickThread(e.a);
     if (e.id === 'BM') e.id = pickMoment();
     if (e.id === 'I') e.id = pickIncident(e.a);
@@ -2486,7 +2602,7 @@ const WANT_ASK = {
   vow: "have left your offering at the cobblers' altar in Southampton, and heard out the man from Soissons on the march"
 };
 /* Anonymous play counts. Only the public release loads the analytics tag; everywhere else this does nothing. */
-function track(name, p) { try { if (typeof gtag === 'function') gtag('event', name, Object.assign({ waking: M ? M.runs + (S && S.banked ? 0 : 1) : 0, version: '0.17' }, p || {})); } catch (e) {} }
+function track(name, p) { try { if (typeof gtag === 'function') gtag('event', name, Object.assign({ waking: M ? M.runs + (S && S.banked ? 0 : 1) : 0, version: '0.18' }, p || {})); } catch (e) {} }
 /* The author's record of how games go. Only the public release has the settings for it; everywhere else this does nothing. */
 const FB = {"projectId": "until-crispins-day", "apiKey": "AIzaSyC8t1QwGPsrX5cJ6TzwcXrVU6s4rzvFJnU"};
 function fbv(v) {
@@ -2502,7 +2618,7 @@ function report() {
     if (!M.pid) M.pid = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
     if (!M.startedAt) M.startedAt = new Date().toISOString();
     const seen = M.seen || {};
-    const doc = { name: String(M.name || '').slice(0, 30), want: M.want || '', version: '0.17', started: M.startedAt, updated: new Date().toISOString(),
+    const doc = { name: String(M.name || '').slice(0, 30), want: M.want || '', version: '0.18', started: M.startedAt, updated: new Date().toISOString(),
       runs: M.runs || 0, far: M.far || 0, wins: M.wins || 0, wonAt: M.wonAt || 0, trueAt: M.trueAt || 0, lived: M.lived || 0,
       scenes: Object.values(seen).reduce((a, b) => a + b, 0), seen: seen, ends: M.ends || {}, lastEnd: M.lastEnd || '', found: Object.keys(M.how || {}).length };
     const f = {}; Object.keys(doc).forEach(k => { f[k] = fbv(doc[k]); });
@@ -2740,7 +2856,7 @@ function renderSheet() {
   const s = S.stats;
   let h = '<div><h3>' + (M.want ? esc(N()) + ', cordwainer\'s apprentice' : 'The man') + '</h3>' + (M.want ? '<p style="margin-bottom:8px">' + esc(WANT[M.want].keep) + '</p>' : '') + '<dl class="stats">' + ['arm', 'eye', 'wits', 'grit'].map(k => '<div><dt>' + STAT[k] + '</dt><dd>' + s[k] + '</dd></div>').join('') +
     '<div><dt>Coin</dt><dd>' + money(S.coin) + '</dd></div><div><dt>Sheaves</dt><dd>' + S.arrows + '</dd></div></dl></div>' +
-    '<div><h3>Standing</h3><p>' + standingWord(S.standing) + (S.flags.centre ? ', placed in the centre' : '') + '</p></div>' +
+    '<div><h3>Standing</h3><p>' + standingWord(S.standing) + (S.flags.baggage ? ', posted to the baggage' : S.flags.centre ? ', placed in the centre' : '') + '</p></div>' +
     '<div><h3>Kit and company</h3><ul class="kit">';
   if (!S.items.length) h += '<li><small>A borrowed bow and what you stand up in.</small></li>';
   S.items.forEach(i => { h += '<li class="' + (ITEM[i].ill ? 'ill' : '') + '">' + esc(ITEM[i].n) + '<small>' + esc(ITEM[i].d) + '</small></li>'; });
@@ -2800,7 +2916,7 @@ function screenHtml() {
     paras(sl && sl.M.runs >= 1 ? `You are a cordwainer's apprentice with a borrowed bow, the twentieth man in a company of twenty archers. You have died in France, and woken on the quay at Southampton with all of it still in your head. Something is wanted of you. You do not yet know what it is.` : `It is August 1415. The King is taking an army to France, and you have taken his sixpence. You know nothing about war, and you are about to learn.`) +
     (sl ? '<p class="note">' + esc(SLOT_NAME[STORE.active] + ': ' + slotLine(sl)) + '</p>' : '') +
     '<div class="menu"><button class="go" type="button" data-act="play">' + (sl ? 'Continue' : 'Begin') + '</button><button class="choice" type="button" data-act="saves">Saved games</button><button class="choice" type="button" data-act="help">How it works</button></div>' +
-    '<p class="ver">Version 0.17. The game saves itself in this browser after every choice.</p>' +
+    '<p class="ver">Version 0.18. The game saves itself in this browser after every choice.</p>' +
     (typeof gtag === 'function' || FB ? '<p class="ver">This page counts plays, and keeps a note of your archer\'s name and how far he got, so the author can see how the game plays. It does not know who you are.</p>' : '') +
     '<p class="ver">© 2026 Neil Fletcher. Found something broken or odd? <a href="https://github.com/neilfletcher/until-crispins-day-play/issues" target="_blank" rel="noopener">Tell me here</a>.</p>';
   if (view === 'menu') return '<p class="eyebrow"><span>' + esc(SLOT_NAME[STORE.active]) + '</span></p><h2>Menu</h2><div class="menu">' +
