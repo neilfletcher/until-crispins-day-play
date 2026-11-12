@@ -4,7 +4,7 @@ A choice-led story game of the Agincourt campaign, played in the browser.
 
 Play it: https://neilfletcher.github.io/until-crispins-day-play/
 
-Current version: 0.18. Your game saves itself in your browser.
+Current version: 0.19. Your game saves itself in your browser.
 
 Found something broken or odd? Open an issue on this repository.
 

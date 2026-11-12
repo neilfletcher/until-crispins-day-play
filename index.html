@@ -47,7 +47,9 @@ button{font-family:inherit;color:inherit}
 .menubtn:hover{border-color:var(--tallow);color:var(--tallow)}
 body[data-view="title"] .top{display:none}
 body:not([data-view="game"]) .track,body:not([data-view="game"]) #runlabel{display:none}
-body[data-view="menu"] .menubtn,body[data-view="saves"] .menubtn,body[data-view="help"] .menubtn{display:none}
+body[data-view="menu"] .menubtn,body[data-view="saves"] .menubtn,body[data-view="help"] .menubtn,body[data-view="codex"] .menubtn{display:none}
+.story p.who{margin:6px 0 10px}
+.story p.who .mem{color:var(--tallow);font-size:15.5px}
 .bigtitle{font-family:var(--display);font-weight:400;font-size:clamp(46px,9vw,84px);line-height:.95;margin:6px 0 20px;text-wrap:balance}
 .menu{display:flex;flex-direction:column;gap:9px;max-width:440px;margin-top:22px}
 .menu .go{margin-top:0;text-align:left}
@@ -725,7 +727,7 @@ scene('b_brother', 'battle', 'Under the banner', () => `Here in the centre the F
 scene('b_order', 'battle', 'The order', () => `${S.flags.purse_lost ? `Your purse went back on the baggage carts, and it has gone wherever the carts' other contents have gone. ` : ''}${S.flags.hero ? `A squire of the household has put a cup of the King's own wine into your hand, and you have not yet dared to drink it. ` : ''}It is won. The first two French battles are a wall of dead and the third is sitting its horses at the far end of the field, thinking. Behind the line the prisoners stand in hundreds with their helmets off, more prisoners than there are Englishmen to guard them.${S.flags.prisoner ? ' Yours is among them, the squire with the forty-crown father, looking seasick.' : ''} Then there is shouting from the rear: the baggage is being plundered, and the third battle is stirring, and the King gives an order that makes the men-at-arms look at their feet. They will not do it, since a prisoner is a ransom and a ransom is a fortune. So two hundred archers are told off to kill the prisoners, and Cutler's twenty is among them.`, [
   { t: 'Do as you are ordered',
     out: [`You do it. It is quickly done, and you do not look at faces. Afterwards the third battle rides away without fighting, so it was all for nothing, and nobody says so aloud.`, { unflag: 'prisoner' }] },
-  { t: 'Put your knife away and stand aside', test: ['wits', 5, 'talk'],
+  { t: 'Put your knife away and stand aside', test: ['wits', 5, 'talk ransom'],
     win: [`You stand with your arms folded and wait to be struck down. Cutler looks at you. Then he puts himself between you and the esquire who is giving the order, and finds something urgent to shout at a man further along. Nobody hangs you. In an hour the order is called off, and the ones still alive are marched away.`, { grit: 1, flag: 'spared' }],
     lose: [`The esquire in charge has the flat of his sword for men who stand with their arms folded. You go down, and when you get up again it is over, and they have managed without you.`, { b: -1 }] },
   { t: "Cut your own man's bonds and point him at the wood", if: () => S.flags.prisoner,
@@ -774,6 +776,61 @@ const VARY = {
   "You can see their eyes through the breaths of their visors, which is nearer than you ever wished to be to a Frenchman.",
   "One of them has a lady's sleeve tied to his helm, sodden and grey.",
   "It sounds like a smithy with men screaming in it."
+ ],
+ "flux": [
+  "A man in the next company has taken a vow to walk to Canterbury barefoot if he is spared, and is already regretting the barefoot.",
+  "The gunners, who drink nothing but their own beer, are nearly all on their feet, and nobody has yet drawn the lesson.",
+  "They are burying by companies now, to save the priests' time."
+ ],
+ "flux_b": [
+  "A physician in a furred gown is going down the rows, tasting nothing and touching nobody.",
+  "Somebody has chalked a tally on a cart tail and then, seeing where it was going, rubbed it out.",
+  "The ships that brought biscuit are taking the sick home, and smell of both."
+ ],
+ "fire_s": [
+  "A drunk Cornishman is trying to sell his place in the fleet for a shilling, and has found no takers.",
+  "The tide is making. You can hear the ships shift at their cables.",
+  "Somebody along the quay is playing a pipe, badly, and nobody has the heart to stop him."
+ ],
+ "fire_h": [
+  "A gun fires once from the town, as a dog barks in its sleep.",
+  "The rats have come up out of the marsh for the warmth, and nobody troubles to throw anything.",
+  "Along the trench a man is reading a letter aloud by the fire to six others who cannot read."
+ ],
+ "fire_m": [
+  "The wood is wet and the fire is mostly smoke, and men sit in the smoke for the sake of the idea.",
+  "Somebody has a single onion, and is cutting it very thin.",
+  "It has stopped raining for the first time in four days, and nobody trusts it."
+ ],
+ "b_wait": [
+  "A cock is crowing in Maisoncelle, quite unconcerned.",
+  "Somebody is trying to light a fire with wet straw, and somebody else is telling him not to waste the straw.",
+  "The French trumpets have been sounding for hours. They have a great many trumpets."
+ ],
+ "b_dawn": [
+  "There are crows in the Tramecourt wood, hundreds of them. They know what an army is.",
+  "A French herald rides along their front in a tabard so bright that it hurts to look at.",
+  "The man beside you has untied his hose, as the flux has taught half the army to do, and stands bare-legged in the plough."
+ ],
+ "b_order": [
+  "It has begun to rain again, very lightly.",
+  "A dog from the baggage is going from one dead man to the next, looking for somebody.",
+  "The heralds of both sides are standing together on a little rise, counting, like two farmers at a market."
+ ],
+ "boon_ieuan": [
+  "He has a new feather behind his ear, and has forgotten that it is there.",
+  "He is waxing a string while he talks, without once looking at his hands.",
+  "A Cheshire man stops to listen, and Ieuan waits, quite pleasantly, until he has gone."
+ ],
+ "boon_cutler": [
+  "He has the tally stick in his hand, and puts it away when he sees you look.",
+  "A stone goes over while he is talking. He does not stop, or look up.",
+  "He has not shaved for a week, and it has made an old man of him."
+ ],
+ "boon_friar": [
+  "His sandals have been mended with bowstring.",
+  "He has acquired a mule from somewhere, and is leading it and not riding it.",
+  "He is thinner than he was at Southampton. So is everybody. He seems to mind it less."
  ],
  "b_melee": [
   "Your hands have stopped shaking, since they have work to do.",
@@ -1105,7 +1162,7 @@ scene('home_m_brother', 'march', () => S.flags.dickon_dead ? "Dickon's bow" : S.
   { t: 'Ask what it was like, carrying a man to the ships', if: () => S.flags.dickon_home,
     out: [`'It wasn't me carried him,' the archer says. 'It was you. He told everyone on the quay. Little brother, he said, the cobbler, carried me a mile.' He looks at you with some curiosity. 'He said you never used to be able to carry anything.'`, { st: 1 }] },
   { t: 'Tell him what a real one is like', if: () => S.flags.dickon_lives,
-    out: [`You tell him. Where to look, when to breathe, how the noise comes before the men. You say it like someone who has stood there, and halfway through he stops interrupting. 'Where did you learn that?' he asks. Here and there, you say. He looks at you for a while. 'You've got old,' he says. 'When did you get old?'`, { wits: 1, flag: 'dickon_told' }] },
+    out: [`You tell him. Where to look, when to breathe, how the noise comes before the men. You say it like someone who has stood there, and halfway through he stops interrupting. 'Where did you learn that?' he asks. Here and there, you say. He looks at you for a while. 'You've got old,' he says. 'When did you get old?'`, { wits: 1, flag: 'dickon_told', say: 'If Dickon goes down on the day, you will know where to look.' }] },
   { t: 'Ask him for a spare string', if: () => S.flags.dickon_lives && !has('string'),
     out: [`He has three, Flemish hemp, waxed, in a tin. He gives you the best one and pretends it is the worst. 'Keep it dry,' he says. 'Under your cap. Father used to say it.' Your father never said anything of the kind, and you both know it.`, { item: 'string' }] },
   { t: 'Sit with him and say nothing much', if: () => S.flags.dickon_lives,
@@ -1187,7 +1244,7 @@ scene('bm_boy', 'battle', 'The boy with the sheaves', `A boy of ten or eleven co
     out: [`You point, and the boy goes. Ieuan takes two sheaves and sets them point-down in the earth without a glance. Then he looks along the line at you and touches his cap, slowly, as he would to an equal.`, { st: 1, wits: 1 }] }
 ], { bm: 1 });
 scene('bm_knight', 'battle', 'A man in the mud', `A French man-at-arms has fallen out of the front of the press and lies ten paces from your stake, on his back, held down by his own harness in mud like glue. He has got his visor up. He is holding out his right gauntlet towards you, which is how a gentleman yields, and he is shouting a name and a sum of money.`, [
-  { t: 'Take the gauntlet. He is worth more than you will earn in your life.', test: ['grit', 3],
+  { t: 'Take the gauntlet. He is worth more than you will earn in your life.', test: ['grit', 3, 'ransom'],
     win: [`You go out past the stakes, take the glove, and drag him in by the heels like a carcase. He weighs what a pig weighs. He thanks you in French all the way and gives his name three times, in case you should forget who is to be asked for the money.`, { flag: 'prisoner', st: 1 }],
     lose: [`You have him by one heel when his friends notice. A lance-butt takes you in the side. You keep hold of the heel, and you could not say why. Cutler tells you later that you are a fool, and that you are now a fool who owns a prisoner.`, { b: -1, flag: 'prisoner' }] },
   { t: 'Leave him. Shoot.', 
@@ -1212,7 +1269,7 @@ scene('bm_ieuan', 'battle', 'Ieuan sits down', `Ieuan sits down suddenly behind 
     out: [`You take it. He nods and shuts his eyes. It is like drawing a church door, and the arrow leaves it as if it had been thrown by God. You do not look round at him again. When the day is over you will go and see what is left to look at.`, { item: 'ibow' }] }
 ], { bm: 1, when: () => has('ieuan') });
 scene('bm_dickon', 'battle', "Suffolk's banner", () => `On the right, by the Tramecourt wood, a banner goes down that you know: the Earl of Suffolk's, the young Earl, four weeks in his father's title. The press closes over the place where it stood. Dickon is under that banner. It is two hundred paces off, along the back of the line.${S.flags.centre ? ' You are in the centre, by the King, where you have died a dozen times trying to be.' : ''}`, [
-  { t: 'Go to him', test: ['grit', 4, 'melee'],
+  { t: 'Go to him', test: ['grit', 4, 'melee dickon'],
     win: [`You run. You go through the back of the fight like a dog through a hedge, and you find him under two dead men and a live one, and the live one is a Frenchman trying to get a dagger through his aventail. You do not remember what you did. Dickon does, and tells it for the rest of his life, and never gets it right.`, { flag: 'dickon_saved', arm: 1, unflag: 'centre', learn: 'k_suffolk', say: 'You have left your place in the line.' }],
     lose: [`You run. A man-at-arms on his knees swings at you as you pass and takes the feet from under you. By the time you reach the place, a Suffolk archer has dragged Dickon clear by his collar, alive and swearing. You are the one who has to be carried.`, { b: -2, flag: 'dickon_saved', unflag: 'centre', learn: 'k_suffolk', say: 'You have left your place in the line.' }] },
   { t: 'Hold your place',
@@ -1820,7 +1877,7 @@ scene('s_gunstones', 'soton', 'Gunstones', `The King is taking guns to France: g
 ], { pool: 1 });
 scene('s_surgeon', 'soton', "The King's surgeon", `Master Thomas Morstede, the King's own surgeon, is taking twelve men to France, and has set out his irons on a trestle by the Watergate to show them what they are for. There are saws, and hooks, and a thing like a pair of long spoons that he says is for drawing an arrow out of a face. A crowd of archers has gathered to look, in the spirit of men inspecting a gallows. He talks while he works on a carter's crushed hand, and he does not waste a word.`, [
   { t: 'Stay and listen to all of it', test: ['wits', 7],
-    win: [`You learn that a wound wants washing in wine, that a man who is bleeding wants his limb held up and tied above the cut, and that most of what the old soldiers pack into a wound will kill you slower than the wound would. It is the most useful hour you have spent in Southampton. You will know what to do with a rag now.`, { wits: 1, flag: 'bandage' }],
+    win: [`You learn that a wound wants washing in wine, that a man who is bleeding wants his limb held up and tied above the cut, and that most of what the old soldiers pack into a wound will kill you slower than the wound would. It is the most useful hour you have spent in Southampton. You will know what to do with a rag now.`, { wits: 1, flag: 'bandage', say: 'The first wound you take will cost you less.' }],
     lose: [`You follow it as far as the saw. After that there is a noise in your ears, and you find you are sitting on the cobbles with your head between your knees and a fishwife fanning you with a plaice.`, {}] },
   { t: 'Buy a twist of his binding root', cost: 2,
     out: [`One of his men sells you tormentil at tuppence the twist, and tells you to chew it when your bowels turn to water, and not before. He says it as a man says something he has said four hundred times this week. You put it in your purse and hope never to learn whether he is honest.`, { item: 'root' }] },
@@ -1935,7 +1992,7 @@ scene('m_guide', 'march', 'A boy who knows the marsh', `The army is marching up 
 
 scene('home_e_debt', 'eve', 'The reckoning', `You do the sum again by what light there is. Forty shillings on the bond. Sixpence a day since the first of August comes to more than that, if the King ever pays it, and he is two months behind. A man-at-arms at the next fire is telling his page how ransom works: a prisoner belongs to the man who takes his glove, a third goes to your captain and a third of that to the King, and even a poor squire is worth more than an archer earns in a year.`, [
   { t: 'Go over and ask him how a prisoner is taken', test: ['wits', 7, 'talk'],
-    win: [`He is amused, and then he is not, since you ask the right questions. You take the right glove. You say your own name and your captain's. You get the man out of the press before somebody else kills him for his rings, and you keep him alive afterwards, which is the hard part. 'They die easily, prisoners,' he says. 'Mind yours.'`, { grit: 1, flag: 'ransomwise' }],
+    win: [`He is amused, and then he is not, since you ask the right questions. You take the right glove. You say your own name and your captain's. You get the man out of the press before somebody else kills him for his rings, and you keep him alive afterwards, which is the hard part. 'They die easily, prisoners,' he says. 'Mind yours.'`, { grit: 1, flag: 'ransomwise', say: 'Taking a prisoner, and keeping him alive, will go better.' }],
     lose: [`He looks you up and down and says that archers take what gentlemen leave. His page laughs. You go back to your own fire having learned only what gentlemen think of you, which you knew already.`, {}] },
   { t: 'Put the bond out of your head until tomorrow is over',
     out: [`Forty shillings is a great weight in Winchester. Here, with the French fires spread across half the sky, it is hard to keep hold of. You let it go for one night, and you sleep the better for it.`, { heal: 1 }] },
@@ -1956,7 +2013,7 @@ scene('home_e_brother', 'eve', () => S.flags.dickon_dead ? 'The bracer' : S.flag
     ? `Dickon is in England. Whatever happens tomorrow, your mother will have one son home, and that was the bargain you made with yourself on the quay. It ought to make you easy. But you are still here, and you find that the bargain had more of your own neck in it than you had reckoned on.`
     : `Dickon is with the young Earl of Suffolk's men on the right of the line, two hundred paces off, and you find him without trying. He is thinner, and his beard has come in, and he has two sheaves and a mallet and the look of a man who has stopped expecting anything. 'They've put us on the end,' he says. 'Next the wood. It'll be all right.' He has never been able to lie to you.`, [
   { t: 'Tell him where you will be, and to look for you', if: () => !S.flags.dickon_dead && !S.flags.dickon_home,
-    out: [`You tell him. He tells you to stay where you are put and not be a fool. Then he takes his old bracer by the strap, where it sits on your arm, and settles it a hole tighter, as he did when you were nine. 'It's never fitted you,' he says. Neither of you says anything more, there being nothing useful left to say.`, { grit: 1, flag: 'dickon_told' }] },
+    out: [`You tell him. He tells you to stay where you are put and not be a fool. Then he takes his old bracer by the strap, where it sits on your arm, and settles it a hole tighter, as he did when you were nine. 'It's never fitted you,' he says. Neither of you says anything more, there being nothing useful left to say.`, { grit: 1, flag: 'dickon_told', say: 'If Dickon goes down on the day, you will know where to look.' }] },
   { t: 'Ask his vintenar to put him further in', if: () => !S.flags.dickon_dead && !S.flags.dickon_home && !S.flags.dickon_safe && !!M.known.k_suffolk, test: ['wits', 8, 'talk'],
     win: [`Suffolk's vintenar is a tired man with a boil on his neck, and you do not ask him a favour. You tell him that Dickon's eyes are good and are wasted on the flank, where he will be shooting into the wood. It happens to be true. He grunts. When you look back Dickon is being moved six files in, and is glaring at you across the camp.`, { flag: 'dickon_safe', grit: 1 }],
     lose: [`He hears you out. Then he says that every man in his company has a brother or a mother, and asks which of them you would like put on the end in his place. You have no answer to that.`, {}] },
@@ -1978,7 +2035,7 @@ scene('home_e_pardon', 'eve', "The King's word", () => `The note is still in you
 ]);
 scene('home_e_vow', 'eve', 'The vigil', () => `Tomorrow is the feast of Crispin and Crispinian, the shoemakers' saints, to whom you made a promise in Winchester when your sister lay sick. ${S.flags.vow_altar ? 'You left your offering at their altar in Southampton.' : 'You have left them no offering yet.'} ${S.flags.vow_soissons ? "And you have heard from the man of Soissons what was done in their own town, to their own people, by the same French who are across the field." : ''} Every shoemaker in England will hear Mass for them in the morning. You will be standing in a ploughed field in the rain. It comes to you that a saint's day is a hard day on which to be in his debt.`, [
   { t: 'Keep the vigil, as a guildsman would', test: ['grit', 7, 'saint'],
-    win: [`You do not sleep. You kneel in the mud with the lead token in your fist and say what you can remember of the office, and where you cannot remember it you say the names of the tools of the trade, which you think they will understand. Towards the end of it you are not cold. You could not tell anyone why.`, { arm: 1, flag: 'vigil' }],
+    win: [`You do not sleep. You kneel in the mud with the lead token in your fist and say what you can remember of the office, and where you cannot remember it you say the names of the tools of the trade, which you think they will understand. Towards the end of it you are not cold. You could not tell anyone why.`, { arm: 1, flag: 'vigil', say: 'For tomorrow, tests of Grit will go a little better.' }],
     lose: [`You mean to keep it. You wake with your face in the mud and the token gone out of your hand, and you spend a bad quarter of an hour finding it by feel. You hope that the intention counts with them.`, {}] },
   { t: 'Mend a boot for somebody. It is their work, after all.',
     out: [`Hodge's sole is hanging off. You have the awl, and thread, and wax. You sit under a cart and mend it properly, with a welt, as if he would be wearing it for years. It is the only prayer you have ever been any good at. Hodge says it is the best boot in France. The twenty lines up with its own.`, { st: 1, wits: 1 }] },
@@ -2253,8 +2310,23 @@ scene('bm_second', 'battle', 'The second battle', `The first French battle is a 
     lose: [`Everything on the heap is either broken or still held. You come back with a dead knight's dagger that turns out to have no point.`, {}] }
 ], { bm: 1, when: () => !S.flags.baggage && !!(S.played.b_close || S.played.b_close_b || S.played.bc_press) });
 
+/* ================= v0.19: a second version of the flux ================= */
+scene('flux_b', 'harfleur', 'The sick lines', () => `By the third week the army has two camps: one before the walls, and one behind it by the ships, where the sick lie in rows under sailcloth and the priests go up and down like men sowing a field. The Bishop of Norwich is dead of it. The Earl of Suffolk is dead of it, and his son is an earl at twenty-one. The Duke of Clarence has been carried aboard a ship. When Harfleur gives up its keys, on the twenty-second of September, half the army is too weak to cheer.${S.flags.shell ? ' You think about the mussels.' : ''}${S.flags.fruit ? ' You think about the apples.' : ''}${S.flags.drank ? ' You think about the ditch water.' : ''}
+
+You know the first gripe when it comes. You have watched it come to everybody else.`, [
+  { t: 'Stay in the trench, and tell nobody', test: ['grit', () => fluxDc(), 'flux'],
+    win: [`You tell nobody, and for three days you do your work with your teeth shut. On the fourth it is gone, as if it had only wanted to see what you would do. You have lost flesh you could not spare. But you walked through it, and the men who lay down are still lying.`, () => fluxFx(true)],
+    lose: [`You tell nobody until you fall off the fire step, and then there is no need to tell. They carry you to the lines on a hurdle. You do not die there, though you are not far off it for a week, and you march out of Harfleur looking like something a priest should have been sent for.`, () => fluxFx(false)] },
+  { t: 'Chew the tormentil root', if: () => has('root'),
+    out: [`It tastes of bark and old boots, and you chew it until your jaw aches. By the second day the gripes have slackened. By the fourth you are carrying other men to the lines, when you had looked to be carried there yourself. Tuppence, it cost you. You have never spent tuppence so well.`, () => Object.assign({ drop: 'root' }, fluxFx(true))] },
+  { t: 'Pay a shipman for a berth in the dry, and boiled water', cost: 6, test: ['grit', () => fluxDc() - 3, 'flux'],
+    win: [`Sixpence buys you a plank in the forecastle of a cog, out of the marsh air, and a kettle the cook keeps on the boil. You lie there four days, listening to the water under the hull. On the fifth you climb back down to France on your own legs.`, () => fluxFx(true)],
+    lose: [`The berth is dry and the water is boiled, and it runs its course in you all the same. You come ashore in time to march, a week out of your bed, and the shipman does not offer you your sixpence back.`, () => fluxFx(false)] }
+], { place: 'Harfleur, September' });
+
 /* ================= v0.10: other versions of the scenes every waking passes through ================= */
 const ALT = {
+  flux: ['flux', 'flux_b'],
   sail: ['sail', 'sail_b', 'sail_c'], landing: ['landing', 'landing_b'], m_open: ['m_open', 'm_open_b'], somme: ['somme', 'somme_b'], night: ['night', 'night_b'],
   b_horse: ['b_horse', 'b_horse_b'], b_advance: ['b_advance', 'b_advance_b'], b_close: ['b_close', 'b_close_b'], b_melee: ['b_melee', 'b_melee_b']
 };
@@ -2497,6 +2569,9 @@ function bonus(c) {
   if (S.flags.ground && T.includes('cav')) b += 2;
   if (S.flags.stakeset && T.includes('cav')) b += 1;
   if (battle && S.flags.earth && stat === 'grit') b += 1;
+  if (battle && S.flags.vigil && stat === 'grit') b += 1;
+  if (S.flags.ransomwise && T.includes('ransom')) b += 2;
+  if (S.flags.dickon_told && T.includes('dickon')) b += 2;
   if (S.flags.clean && T.includes('flux')) b += 2;
   if (T.includes('saint') && has('badge')) b += 2;
   if (T.includes('perkin')) b += bonded() ? 2 : S.flags.cold ? -2 : 0;
@@ -2517,9 +2592,9 @@ function apply(fx, L) {
   if (typeof fx === 'function') fx = fx();
   if (!fx) return;
   ['arm', 'eye', 'wits', 'grit'].forEach(k => { if (fx[k]) { if (fx[k] > 0) { if ((S.grew[k] || 0) >= 2) { if (M.runs >= 1) L.push([STAT[k] + ': no gain. It has grown twice already' + (M.runs >= 1 ? ', and that is the most one waking will teach' : ''), '']); return; } S.grew[k] = (S.grew[k] || 0) + 1; note('grow', L); } S.stats[k] = Math.max(0, S.stats[k] + fx[k]); L.push([(fx[k] > 0 ? '+' : '−') + Math.abs(fx[k]) + ' ' + STAT[k], fx[k] < 0 ? 'bad' : '']); } });
-  if (fx.item) [].concat(fx.item).forEach(i => { if (has(i)) return; if (!ITEM[i].ill) note('kit', L); S.items.push(i); if (ITEM[i].hp) { S.maxBlood++; S.blood++; } L.push([(ITEM[i].ill ? 'Taken ill: ' : 'Gained: ') + ITEM[i].n, ITEM[i].ill ? 'bad' : '']); });
+  if (fx.item) [].concat(fx.item).forEach(i => { if (has(i)) return; if (!ITEM[i].ill) note('kit', L); if (/^bn_/.test(i)) { M.boons = M.boons || {}; M.boons[i] = 1; } S.items.push(i); if (ITEM[i].hp) { S.maxBlood++; S.blood++; } L.push([(ITEM[i].ill ? 'Taken ill: ' : 'Gained: ') + ITEM[i].n, ITEM[i].ill ? 'bad' : '']); });
   if (fx.drop && has(fx.drop)) { S.items = S.items.filter(i => i !== fx.drop); L.push(['Used: ' + ITEM[fx.drop].n, '']); }
-  if (fx.b) { note('blood', L); S.blood += fx.b; L.push(['Blood −' + Math.abs(fx.b), 'bad']); }
+  if (fx.b) { note('blood', L); S.blood += fx.b; if (fx.b < 0 && S.flags.bandage && !S.flags.bandage_used && S.blood > 0) { S.flags.bandage_used = 1; S.blood += 1; L.push(["You bind it as the King's surgeon showed. Blood +1", '']); } L.push(['Blood −' + Math.abs(fx.b), 'bad']); }
   if (fx.heal) { const h = Math.min(fx.heal, S.maxBlood - S.blood); if (h > 0) { S.blood += h; L.push(['Blood +' + h, '']); } }
   if (fx.c) { const before = S.coin; S.coin = Math.max(0, S.coin + fx.c); const d = S.coin - before; if (d) L.push([(d > 0 ? '+' : '−') + money(Math.abs(d)), d < 0 ? 'bad' : '']); }
   if (fx.ar) { S.arrows = Math.max(0, S.arrows + fx.ar); L.push(['Arrows +' + fx.ar + ' sheaf', '']); }
@@ -2602,7 +2677,7 @@ const WANT_ASK = {
   vow: "have left your offering at the cobblers' altar in Southampton, and heard out the man from Soissons on the march"
 };
 /* Anonymous play counts. Only the public release loads the analytics tag; everywhere else this does nothing. */
-function track(name, p) { try { if (typeof gtag === 'function') gtag('event', name, Object.assign({ waking: M ? M.runs + (S && S.banked ? 0 : 1) : 0, version: '0.18' }, p || {})); } catch (e) {} }
+function track(name, p) { try { if (typeof gtag === 'function') gtag('event', name, Object.assign({ waking: M ? M.runs + (S && S.banked ? 0 : 1) : 0, version: '0.19' }, p || {})); } catch (e) {} }
 /* The author's record of how games go. Only the public release has the settings for it; everywhere else this does nothing. */
 const FB = {"projectId": "until-crispins-day", "apiKey": "AIzaSyC8t1QwGPsrX5cJ6TzwcXrVU6s4rzvFJnU"};
 function fbv(v) {
@@ -2618,7 +2693,7 @@ function report() {
     if (!M.pid) M.pid = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
     if (!M.startedAt) M.startedAt = new Date().toISOString();
     const seen = M.seen || {};
-    const doc = { name: String(M.name || '').slice(0, 30), want: M.want || '', version: '0.18', started: M.startedAt, updated: new Date().toISOString(),
+    const doc = { name: String(M.name || '').slice(0, 30), want: M.want || '', version: '0.19', started: M.startedAt, updated: new Date().toISOString(),
       runs: M.runs || 0, far: M.far || 0, wins: M.wins || 0, wonAt: M.wonAt || 0, trueAt: M.trueAt || 0, lived: M.lived || 0,
       scenes: Object.values(seen).reduce((a, b) => a + b, 0), seen: seen, ends: M.ends || {}, lastEnd: M.lastEnd || '', found: Object.keys(M.how || {}).length };
     const f = {}; Object.keys(doc).forEach(k => { f[k] = fbv(doc[k]); });
@@ -2650,7 +2725,9 @@ function othersHtml() {
     '<li><b>' + esc(t) + '.</b> ' + esc(c) + '. <span class="mem">' + (p <= 0 ? 'Almost nobody else chose this.' : p >= 100 ? 'Everybody chooses this.' : p + ' in a hundred chose the same.') + '</span></li>').join('') + '</ul>';
 }
 function finishRun(how) {
-  M.lastHow = how; M.runs++; M.lessons += S.lessons; S.banked = 1;
+  M.lastHow = how; M.runs++;
+  M.endSeen = M.endSeen || {}; M.endSeen[how === 'dead' ? (S.flags.wenthome || 'died') : how === 'won' ? (pairDone() ? 'true' : 'hero') : how] = 1;
+  if (S.act === 'battle') { M.pos = M.pos || {}; M.pos[S.flags.baggage ? 'baggage' : S.flags.centre ? 'centre' : 'wing'] = 1; } M.lessons += S.lessons; S.banked = 1;
   const sc0 = S.queue[S.i] ? S.queue[S.i].id : '', end = how === 'dead' ? (S.flags.wenthome === 'gaveup' ? 'gave_up' : S.flags.wenthome ? 'left' : 'died') : how === 'lived' ? 'survived' : 'saved_duke';
   track('waking_end', { result: end, act: S.act, scene: sc0, waking: M.runs });
   track('end_' + end + '_' + S.act, { scene: sc0, waking: M.runs });
@@ -2815,6 +2892,7 @@ function campHtml() {
   const ks = Object.keys(KNOW).filter(kn);
   h += '<p class="sub">What you know that no one else does</p>' + (ks.length ? '<ul class="known">' + ks.map(k => '<li>' + esc(KNOW[k]) + '</li>').join('') + '</ul>' : '<p class="note">Nothing yet, beyond the fact of it.</p>');
   h += wantedHtml();
+  h += '<button class="quiet" type="button" data-act="codex">What you have seen so far</button>';
   h += '<button class="go" type="button" data-act="begin">' + (M.runs <= 1 ? 'Wake' : 'Make your mark on the roll') + '</button>' +
     '<button class="quiet" type="button" data-act="reset">' + (sure ? 'Sure? This forgets every waking.' : 'Forget everything and start as a stranger') + '</button>';
   return h;
@@ -2901,6 +2979,73 @@ let howNew = {};
 function howGot() { const m = howM(); return HOW.map(([f], n) => f(m) ? n : -1).filter(n => n >= 0); }
 function howSeen() { if (!M) return {}; if (!M.howSeen) { M.howSeen = {}; if (M.howRead) howGot().slice(0, M.howRead).forEach(n => { M.howSeen[n] = 1; }); } return M.howSeen; }
 function howFresh() { const seen = howSeen(); return howGot().filter(n => !seen[n]); }
+const PEOPLE = [
+  ['Perkin', [
+    [m => m.seen.wake, "The baker's boy from your street in Winchester. He is sixteen, and has decided to enjoy the war."],
+    [m => m.seen.s_perkin, 'He thought about going home before the fleet sailed.'],
+    [m => m.seen.s_perkin_dog, 'He will take in anything with four legs.'],
+    [m => m.seen.s_perkin_bow || m.seen.s_drill, 'He cannot shoot. He can be taught.'],
+    [m => m.seen.s_perkin_girl, 'There is a girl. With Perkin there is always a girl.'],
+    [m => m.seen.h_perkin, 'He killed his first man at Harfleur, and did not know what to do with it afterwards.'],
+    [m => m.seen.h_perkin_letter, 'His father marks the bread with a loaf and a cross, and Perkin signs his letters the same way.'],
+    [m => m.known.k_pyx, 'Left alone at the church by the road, he takes the pyx, and the King hangs him for it.']]],
+  ['Ieuan', [
+    [m => m.seen.s_billet || m.seen.s_ieuan || m.seen.s_butts || m.seen.boon_ieuan, 'A grey Welshman, the oldest of the twenty and the best shot in it. He seldom says a thing twice.'],
+    [m => m.seen.s_ieuan, 'His bow is as tall as he is, and thicker at the grip than your wrist.'],
+    [m => m.seen.h_ieuan, 'He was on the other side once: four years in a castle under siege, and at the end of it they ate the harness.'],
+    [m => m.seen.h_ieuan_boy, 'He will not shoot at a boy on a wall.'],
+    [m => m.seen.e_ieuan_sister, 'There is a name in Gwent that he wants carried, if he cannot carry it.'],
+    [m => m.seen.bm_ieuan, 'On the day, he sits down behind his stake.']]],
+  ['Cutler', [
+    [m => m.seen.wake, 'Hob Cutler, vintenar of the twenty. He looks at a new man as a fishmonger looks at a herring he has been asked to take back.'],
+    [m => m.seen.s_dice || m.known.k_dice, 'His bone die has a six that comes up as if it were paid to.'],
+    [m => m.seen.s_cutler_roll, 'He cannot read. He has got through twenty years of soldiering without anybody finding it out.'],
+    [m => m.seen.s_wages, 'The company purse is honest. It has buried four of his men and sent money to two widows.'],
+    [m => m.known.k_tok2 || m.seen.h_first, 'He cuts a notch on a stick for every man he loses.'],
+    [m => m.known.k_tok3, 'His wife is Joan, at the Angel in Alresford.']]],
+  ['Reeve', [
+    [m => m.seen.s_reeve || m.seen.s_billet || m.seen.s_reeve_dice, 'Jankin Reeve, a soldier since the Welsh wars, who learned all the wrong things from it. He is the only man Cutler never turns his back on.'],
+    [m => m.seen.s_reeve, 'He charges new men a footing. It is not the custom.'],
+    [m => m.seen.s_billet, 'He once served under Lord Grey. That is all he has ever told you about himself.'],
+    [m => m.seen.h_reeve, 'He goes through the purses of the dying.'],
+    [m => m.seen.m_guide, 'He trusts nobody, and is put out when nobody turns out to deserve it.']]],
+  ['The friar', [
+    [m => m.seen.s_friar, 'A Franciscan with a tray of pewter saints, and a grip like a farrier.'],
+    [m => m.seen.boon_friar, 'He came to France after all, and walked every mile of it in sandals.']]],
+  ['The two saints', [
+    [m => m.runs >= 1, "Crispin and Crispinian, the cobblers' saints. They were drowned, boiled and beheaded before they consented to stay dead."],
+    [m => (m.between || 0) >= 2, 'Two men at a bench in a low room, who do not look round.']]]
+];
+const ENDINGS = [
+  [m => m.endSeen.died || m.runs - (m.lived || 0) - (m.wins || 0) > 0, 'Died in France'],
+  [m => m.endSeen.home || m.known.k_home, 'Went home to Winchester'],
+  [m => m.endSeen.stay, 'Stayed behind the walls of Harfleur'],
+  [m => m.endSeen.gaveup, 'Sat down and stopped'],
+  [m => m.lived, 'Alive at the end of it'],
+  [m => m.endSeen.hero || (m.wins && !m.trueAt) || (m.wonAt && m.trueAt && m.wonAt < m.trueAt), 'The day after'],
+  [m => m.trueAt, 'The pair finished']
+];
+function codexHtml() {
+  const m = Object.assign({ seen: {}, known: {}, deaths: {}, runs: 0 }, M || {}); m.endSeen = m.endSeen || {}; m.pos = m.pos || {}; m.boons = m.boons || {};
+  let h = '<p class="eyebrow"><span>The record</span></p><h2>What you have seen</h2>';
+  const all = Object.values(SC).filter(x => x.id !== 'origin');
+  h += '<p class="sub">Scenes</p><ul class="known">' + ACTS.map(a => { const t = all.filter(x => x.act === a), g = t.filter(x => m.seen[x.id]); return '<li>' + ACT_NAME[a] + ': ' + g.length + ' of ' + t.length + '</li>'; }).join('') + '</ul>';
+  h += '<p class="sub">People</p>';
+  let none = true;
+  PEOPLE.forEach(([n, lines]) => { const open = lines.filter(([f]) => f(m)), left = lines.length - open.length; if (!open.length) return; none = false;
+    h += '<p class="who"><b>' + esc(n) + '.</b> ' + open.map(([, t]) => esc(t)).join(' ') + (left ? ' <span class="mem">' + (left === 1 ? 'One thing more to learn.' : left + ' things more to learn.') + '</span>' : '') + '</p>'; });
+  if (none) h += '<p class="note">Nobody yet.</p>';
+  const bn = Object.keys(ITEM).filter(k => /^bn_/.test(k));
+  if (Object.keys(m.boons).length) h += '<p class="sub">What you have been taught</p><ul class="known">' + bn.filter(k => m.boons[k]).map(k => '<li>' + esc(ITEM[k].n) + '</li>').join('') + '</ul>' + (bn.some(k => !m.boons[k]) ? '<p class="note">' + bn.filter(k => !m.boons[k]).length + ' teachings not yet taken.</p>' : '');
+  if (Object.keys(m.pos).length) h += '<p class="sub">Where you have stood on the day</p><ul class="known">' + [['wing', 'The right of the line'], ['centre', "The centre, by the King's battle"], ['baggage', 'The baggage, a mile behind']].map(([k, t]) => '<li>' + (m.pos[k] ? t : 'A place not yet stood in') + '</li>').join('') + '</ul>';
+  if (m.runs >= 1) { const e = ENDINGS.filter(([f]) => f(m)); h += '<p class="sub">How it has ended</p><ul class="known">' + e.map(([, t]) => '<li>' + t + '</li>').join('') + '</ul>' + (e.length < ENDINGS.length ? '<p class="note">' + (ENDINGS.length - e.length === 1 ? 'One ending not yet found.' : (ENDINGS.length - e.length) + ' endings not yet found.') + '</p>' : ''); }
+  const ks = Object.keys(KNOW).filter(k => m.known[k]);
+  if (ks.length && m.runs >= 1) h += '<p class="sub">What you know that no one else does</p><ul class="known">' + ks.map(k => '<li>' + esc(KNOW[k]) + '</li>').join('') + '</ul>';
+  const by = {}; Object.keys(m.deaths || {}).forEach(k => { const id = k.split(':')[0]; by[id] = (by[id] || 0) + m.deaths[k]; });
+  const dl = Object.keys(by).filter(id => SC[id]).sort((a, b) => by[b] - by[a]).slice(0, 12);
+  if (dl.length) h += '<p class="sub">Where you have died</p><ul class="known">' + dl.map(id => { let t = id; try { t = titleOf(SC[id]); } catch (e) {} return '<li>' + esc(t) + (by[id] > 1 ? ', ' + by[id] + ' times' : '') + '</li>'; }).join('') + '</ul>';
+  return h + '<button class="go" type="button" data-act="back">Back</button>';
+}
 function howHtml() {
   const m = howM();
   const got = howGot(), left = HOW.length - got.length;
@@ -2916,16 +3061,18 @@ function screenHtml() {
     paras(sl && sl.M.runs >= 1 ? `You are a cordwainer's apprentice with a borrowed bow, the twentieth man in a company of twenty archers. You have died in France, and woken on the quay at Southampton with all of it still in your head. Something is wanted of you. You do not yet know what it is.` : `It is August 1415. The King is taking an army to France, and you have taken his sixpence. You know nothing about war, and you are about to learn.`) +
     (sl ? '<p class="note">' + esc(SLOT_NAME[STORE.active] + ': ' + slotLine(sl)) + '</p>' : '') +
     '<div class="menu"><button class="go" type="button" data-act="play">' + (sl ? 'Continue' : 'Begin') + '</button><button class="choice" type="button" data-act="saves">Saved games</button><button class="choice" type="button" data-act="help">How it works</button></div>' +
-    '<p class="ver">Version 0.18. The game saves itself in this browser after every choice.</p>' +
+    '<p class="ver">Version 0.19. The game saves itself in this browser after every choice.</p>' +
     (typeof gtag === 'function' || FB ? '<p class="ver">This page counts plays, and keeps a note of your archer\'s name and how far he got, so the author can see how the game plays. It does not know who you are.</p>' : '') +
     '<p class="ver">© 2026 Neil Fletcher. Found something broken or odd? <a href="https://github.com/neilfletcher/until-crispins-day-play/issues" target="_blank" rel="noopener">Tell me here</a>.</p>';
   if (view === 'menu') return '<p class="eyebrow"><span>' + esc(SLOT_NAME[STORE.active]) + '</span></p><h2>Menu</h2><div class="menu">' +
     '<button class="go" type="button" data-act="resume">Back to the game</button>' +
     '<button class="choice" type="button" data-act="saves">Saved games<div class="tags"><span>save, load, copy or delete a game</span></div></button>' +
     '<button class="choice" type="button" data-act="help">How it works</button>' +
+    (M ? '<button class="choice" type="button" data-act="codex">What you have seen<div class="tags"><span>people, places and endings found so far</span></div></button>' : '') +
     (inRun ? '<button class="choice" type="button" data-act="giveup">' + (sureKey === 'giveup' ? 'Sure? Press again to give up this waking.' : 'Give up this waking') + '<div class="tags"><span>wake on the quay now, keeping the lessons earned so far</span></div></button>' : '') +
     '<button class="choice" type="button" data-act="wipe">' + (sureKey === 'wipe' ? 'Sure? Press again. This erases the game in play.' : 'Start this game again from nothing') + '<div class="tags"><span class="dead">' + (M && M.runs >= 1 ? 'erases this game: wakings, lessons and memories' : 'erases this game') + '</span></div></button>' +
     '<button class="choice" type="button" data-act="title">Title page</button></div>';
+  if (view === 'codex') return codexHtml();
   if (view === 'help') return '<p class="eyebrow"><span>How it works</span></p><h2>What you have found out</h2>' + howHtml() +
     '<button class="go" type="button" data-act="back">Back</button>';
   let h = '<p class="eyebrow"><span>Three games, kept in this browser</span></p><h2>Saved games</h2>' + paras('The game in play saves itself after every choice. You can keep three separate games here, copy one over another, or turn a game into text to carry to another device.') + '<div class="shop">';
@@ -2966,7 +3113,7 @@ document.addEventListener('click', e => {
   if (act !== 'reset') sure = false;
   const twice = key => { if (sureKey === key) { sureKey = ''; return true; } sureKey = key; return false; };
   const keep = sureKey; sureKey = '';
-  const nav = { saves: 1, help: 1, menu: 1, title: 1, back: 1, resume: 1, play: 1, 'slot-play': 1, 'slot-copy': 1, 'slot-del': 1, export: 1, copycode: 1, import: 1, giveup: 1, wipe: 1 };
+  const nav = { saves: 1, help: 1, codex: 1, menu: 1, title: 1, back: 1, resume: 1, play: 1, 'slot-play': 1, 'slot-copy': 1, 'slot-del': 1, export: 1, copycode: 1, import: 1, giveup: 1, wipe: 1 };
   if (nav[act]) {
     const i = Number(b.dataset.i);
     if (act !== 'import') importMsg = '';
@@ -2975,7 +3122,7 @@ document.addEventListener('click', e => {
     else if (act === 'resume') view = M && S ? 'game' : 'title';
     else if (act === 'menu') { view = 'menu'; backTo = 'menu'; }
     else if (act === 'title') { view = 'title'; backTo = 'title'; }
-    else if (act === 'saves' || act === 'help') { if (view === 'title' || view === 'menu' || view === 'game') backTo = view; view = act; showCode = false; if (act === 'help') { howNew = {}; if (M) { howFresh().forEach(n => { howNew[n] = 1; M.howSeen[n] = 1; }); save(); } } }
+    else if (act === 'saves' || act === 'help' || act === 'codex') { if (view === 'title' || view === 'menu' || view === 'game') backTo = view; view = act; showCode = false; if (act === 'help') { howNew = {}; if (M) { howFresh().forEach(n => { howNew[n] = 1; M.howSeen[n] = 1; }); save(); } } }
     else if (act === 'back') view = backTo === 'game' && M && S ? 'game' : backTo === 'menu' && M && S ? 'menu' : 'title';
     else if (act === 'slot-play') { openSlot(i); view = 'game'; }
     else if (act === 'slot-copy') { sureKey = keep; if (twice('copy' + i) && M && S) { STORE.slots[i] = JSON.parse(JSON.stringify({ M, S, at: Date.now() })); persist(); } }
