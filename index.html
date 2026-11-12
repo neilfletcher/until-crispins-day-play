@@ -127,6 +127,7 @@ body[data-view="menu"] .menubtn,body[data-view="saves"] .menubtn,body[data-view=
 .shop{display:flex;flex-direction:column;gap:7px;margin:14px 0}
 .up{display:grid;grid-template-columns:1fr auto;gap:2px 12px;align-items:center;background:var(--mud);border:1px solid var(--clay);border-radius:3px;padding:9px 12px}
 .up b{font-weight:700}
+.up.sworn{border-color:var(--tallow)}
 .up small{display:block;color:var(--ash);font-size:15px}
 .up .rank{color:var(--tallow);letter-spacing:2px;font-size:13px}
 .up button{font-family:var(--label);font-weight:700;font-size:14.5px;letter-spacing:.06em;padding:7px 12px;border:1px solid var(--tallow);border-radius:3px;background:transparent;color:var(--tallow);cursor:pointer;white-space:nowrap}
@@ -267,7 +268,8 @@ const money = d => d >= 12 ? Math.floor(d / 12) + 's' + (d % 12 ? ' ' + d % 12 +
 
 let M = null, S = null, sure = false;
 const has = i => S.items.includes(i);
-const kn = k => !!M.known[k];
+let BLIND = false;
+const kn = k => !BLIND && !!M.known[k];
 const bonded = () => S.flags.bond && !S.flags.cold;
 const perkinHere = () => S.perkin === 'here';
 
@@ -1349,7 +1351,7 @@ scene('x_chaplain', 'any', "The chaplain's questions", `A chaplain of the King's
 
 /* ================= v0.6: fast routes through acts already mastered ================= */
 const FAST_AFTER = 2;
-const knowsAct = a => ((M.done || {})[a] || 0) >= FAST_AFTER;
+const knowsAct = a => !(S && (S.oath === 'road' || S.oath === 'plain')) && ((M.done || {})[a] || 0) >= FAST_AFTER;
 scene('fast_soton', 'soton', 'Ten days in Southampton', `You do not live these days so much as walk through them. You know which plank on the quay is loose. You know what Cutler will say before he has drawn the breath to say it, and who will win at dice, and which lords will lose their heads outside the Bargate. The days go past you like a road you have walked too often to see. You cannot be everywhere in them, though, and you have to decide what to make sure of.`, [
   { t: 'Perkin. Keep him close and out of trouble.', if: perkinHere,
     out: [`You are at his elbow when he thinks of running, and when he thinks of dicing, and when Reeve looks at him. By the time the fleet sails he has stopped wondering how you always happen to be there. He has decided that you are simply that sort of friend.`, { flag: 'bond', grit: 1, pull: ['perkin', 2], say: 'Perkin will keep close to you.' }] },
@@ -3087,6 +3089,23 @@ scene('home_e_vow_b', 'eve', 'The eve of the feast', () => `The chaplains are he
   { t: 'Hang the token on your bowstave, and sleep',
     out: [`You loop the thong round the upper limb, where it will swing in front of your face when you draw. If they want to see what you do tomorrow, they will have the best place on the field. You tell them so. Then you pull your hood down and, somewhat to your surprise, you sleep.`, { heal: 1 }] }
 ]);
+/* ================= v0.29: oaths. Optional harder conditions, offered once the day has been won ================= */
+const OATHS = [
+  { id: 'plain', n: 'To use nothing you remember', d: 'No choice marked "You remember" will be open to you, and no short cuts. You go as a man who has never seen these days.', ok: () => true },
+  { id: 'road', n: 'To walk every mile', d: 'No short cuts through Southampton, the siege or the march, however well you know them.', ok: () => true },
+  { id: 'lean', n: 'To go hungry', d: 'You begin with an empty purse, and able to take one wound fewer.', ok: () => true },
+  { id: 'perkin', n: 'To bring Perkin through', d: 'It is kept only if Perkin is standing beside you at the end of the day.', ok: () => S.perkin === 'here' },
+  { id: 'clean', n: 'To kill no prisoner', d: 'It is kept only if, when the order comes, you do not carry it out.', ok: () => !!(S.flags.spared || S.flags.mercy) }
+];
+const oathOf = id => OATHS.find(o => o.id === id);
+function oathsHtml() {
+  if (!M.wins) return '';
+  const kept = M.oaths || {}, n = OATHS.filter(o => kept[o.id]).length;
+  let h = '<p class="sub">An oath, if you care to swear one</p>' + paras('The two at the bench will hear an oath from a man who has already done what was asked of him. It makes the road harder and changes nothing else. It counts as kept only on a waking in which the Duke is saved. ' + (n ? 'You have kept ' + n + ' of ' + OATHS.length + '.' : 'You have kept none yet.')) + '<div class="shop">';
+  OATHS.forEach(o => { const on = M.oathNext === o.id;
+    h += '<div class="up' + (on ? ' sworn' : '') + '"><div><b>' + esc(o.n) + '</b>' + (kept[o.id] ? ' <span class="rank">kept</span>' : '') + '<small>' + esc(o.d) + '</small></div><button type="button" data-act="oath" data-id="' + o.id + '">' + (on ? 'Sworn. Unsay it' : 'Swear') + '</button></div>'; });
+  return h + '</div>';
+}
 function newRun() {
   const u = M.up;
   S = { stats: { arm: 1 + (u.arm || 0), eye: 1 + (u.eye || 0), wits: 1 + (u.wits || 0), grit: 1 + (u.grit || 0) },
@@ -3096,6 +3115,7 @@ function newRun() {
   if (M.want) S.stats[WANT[M.want].stat] += 1;
   if (u.string) S.items.push('string');
   if (u.badge) S.items.push('badge');
+  if (M.wins && M.oathNext && oathOf(M.oathNext)) { S.oath = M.oathNext; if (S.oath === 'lean') { S.coin = 0; S.maxBlood -= 1; S.blood -= 1; } track('oath_sworn', { oath: S.oath }); }
   const draw = (act, n) => Object.values(SC).filter(s => s.pool && s.act === act && (!s.when || s.when()))
     .map(s => [s.id, (M.seen[s.id] || 0) + rnd() * 0.9]).sort((a, b) => a[1] - b[1]).slice(0, n).map(x => x[0]);
   const q = (id, d, a) => ({ id, d: d || '', a: a || '' });
@@ -3229,7 +3249,7 @@ function fixNames(t, sid) {
 function dcOf(c) { const sc = cur(); return (typeof c.test[1] === 'function' ? c.test[1]() : c.test[1]) + HARD[S.act] - (sc && sc.id === 'b_brother' ? Math.min(3, M.heroFails || 0) : 0); }
 function chance(c) { return pNeed(dcOf(c) - S.stats[c.test[0]] - bonus(c)); }
 const oddsWord = p => p >= 0.9 ? 'near certain' : p >= 0.7 ? 'good odds' : p >= 0.45 ? 'even odds' : p >= 0.22 ? 'long odds' : 'a prayer';
-function visible(sc) { return sc.choices.map((c, i) => ({ c, i })).filter(({ c }) => (!c.if || c.if()) && (!c.know || kn(c.know))); }
+function visible(sc) { BLIND = !!(S && S.oath === 'plain'); try { return sc.choices.map((c, i) => ({ c, i })).filter(({ c }) => (!c.if || c.if()) && (!c.know || kn(c.know))); } finally { BLIND = false; } }
 function blocked(c) { return c.cost && S.coin < c.cost ? 'not enough coin' : c.arrows && S.arrows < 1 ? 'no arrows left' : ''; }
 
 function apply(fx, L) {
@@ -3274,9 +3294,11 @@ function choose(i) {
   if (c.test) {
     const need = dcOf(c) - S.stats[c.test[0]] - bonus(c);
     let ok = d6() + d6() >= need;
-    if (!ok && has('badge')) {
+    const lf = c.lose && c.lose[1], hurts = typeof lf === 'function' || (lf && (lf.b < 0 || lf.die)) || S.act === 'battle';
+    if (!ok && has('badge') && hurts) {
       S.items = S.items.filter(x => x !== 'badge');
-      notes.push('The pewter saints go hot against your chest, and for a moment the world hesitates. Then the badge is only pewter, and cracked through.');
+      notes.push('It goes wrong, and then it has not gone wrong. The pewter saints on your badge go hot against your chest, and for a moment the world hesitates and tries again. After that the badge is only pewter, and cracked through.');
+      L.push(["The cobblers' badge is spent", 'bad']);
       ok = d6() + d6() >= need;
     }
     out = ok ? c.win : c.lose; went = ok ? 'w' : 'l';
@@ -3322,7 +3344,7 @@ const WANT_ASK = {
   vow: "have left your offering at the cobblers' altar in Southampton, and heard out the man from Soissons on the march"
 };
 /* Anonymous play counts. Only the public release loads the analytics tag; everywhere else this does nothing. */
-function track(name, p) { try { if (typeof gtag === 'function') gtag('event', name, Object.assign({ waking: M ? M.runs + (S && S.banked ? 0 : 1) : 0, version: '0.28' }, p || {})); } catch (e) {} }
+function track(name, p) { try { if (typeof gtag === 'function') gtag('event', name, Object.assign({ waking: M ? M.runs + (S && S.banked ? 0 : 1) : 0, version: '0.30' }, p || {})); } catch (e) {} }
 /* The author's record of how games go. Only the public release has the settings for it; everywhere else this does nothing. */
 const FB = {"projectId": "until-crispins-day", "apiKey": "AIzaSyC8t1QwGPsrX5cJ6TzwcXrVU6s4rzvFJnU"};
 function fbv(v) {
@@ -3338,7 +3360,7 @@ function report() {
     if (!M.pid) M.pid = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
     if (!M.startedAt) { M.startedAt = new Date().toISOString(); M.preRuns = M.runs || 0; }
     const seen = M.seen || {};
-    const doc = { name: String(M.name || '').slice(0, 30), want: M.want || '', version: '0.28', started: M.startedAt, updated: new Date().toISOString(),
+    const doc = { name: String(M.name || '').slice(0, 30), want: M.want || '', version: '0.30', started: M.startedAt, updated: new Date().toISOString(),
       runs: M.runs || 0, far: M.far || 0, wins: M.wins || 0, wonAt: M.wonAt || 0, trueAt: M.trueAt || 0, lived: M.lived || 0,
       scenes: Object.values(seen).reduce((a, b) => a + b, 0), seen: seen, ends: M.ends || {}, lastEnd: M.lastEnd || '', pre: M.preRuns || 0, found: Object.keys(M.how || {}).length };
     const f = {}; Object.keys(doc).forEach(k => { f[k] = fbv(doc[k]); });
@@ -3380,6 +3402,7 @@ function finishRun(how) {
   M.ends = M.ends || {}; M.ends[end + '_' + S.act] = (M.ends[end + '_' + S.act] || 0) + 1; M.lastEnd = end + '_' + S.act;
   if (how === 'dead') M.last = S.flags.wenthome === 'gaveup' ? 'because you stopped, which the saints seem to allow' : S.flags.wenthome === 'stay' ? 'in a dry bed behind the walls of Harfleur, of nothing at all' : S.flags.wenthome ? 'in your own bed in Winchester, of nothing at all' : DIED_WHERE[S.act];
   if (how === 'lived') { M.lived = (M.lived || 0) + 1; M.last = 'in your sleep, as far as you can tell, the night after the battle'; }
+  if (how === 'won' && S.oath && oathOf(S.oath) && oathOf(S.oath).ok()) { M.oaths = M.oaths || {}; S.oathKept = M.oaths[S.oath] ? 1 : 2; if (!M.oaths[S.oath]) M.lessons += 4; M.oaths[S.oath] = (M.oaths[S.oath] || 0) + 1; track('oath_kept', { oath: S.oath }); }
   if (how === 'won') { M.wins++; if (!M.wonAt) M.wonAt = M.runs; S.tier = pairDone() ? 'true' : 'hero'; if (S.tier === 'true' && !M.trueAt) M.trueAt = M.runs;
     track(S.tier === 'true' ? 'ending_true' : 'ending_hero', { waking: M.runs });
     if (S.tier === 'true' && M.trueAt === M.runs) track('completed_game', { waking: M.runs }); else if (M.wonAt === M.runs) track('first_win', { waking: M.runs }); }
@@ -3539,6 +3562,7 @@ function campHtml() {
   const ks = Object.keys(KNOW).filter(kn);
   h += '<p class="sub">What you know that no one else does</p>' + (ks.length ? '<ul class="known">' + ks.map(k => '<li>' + esc(KNOW[k]) + ((M.knownAt || {})[k] ? ' <small class="src">Learned at: ' + esc(M.knownAt[k]) + '</small>' : '') + '</li>').join('') + '</ul>' : '<p class="note">Nothing yet, beyond the fact of it.</p>');
   h += wantedHtml();
+  h += oathsHtml();
   h += '<button class="quiet" type="button" data-act="codex">What you have seen so far</button>';
   h += '<button class="go" type="button" data-act="begin">' + (M.runs <= 1 ? 'Wake' : 'Make your mark on the roll') + '</button>' +
     '<button class="quiet" type="button" data-act="reset">' + (sure ? 'Sure? This forgets every waking.' : 'Forget everything and start as a stranger') + '</button>';
@@ -3574,6 +3598,7 @@ ${wantEnd()}
 
 You lie down that night in the barn at Maisoncelle and you are afraid to close your eyes. When you open them, there is straw. There is frost on the dead in the field, and somebody is frying bacon, and it is the twenty-sixth of October. ${S.tier === 'true' ? 'You look in your fist for the awl and it is gone. Your boots are whole, and they are your own work.' : 'Your boots have a hole in them. You look in your fist for the awl and it is gone.'}`) +
     (S.tier === 'true' ? '<p class="note">It took you ' + M.runs + ' wakings to finish the pair. There is nothing left undone.</p>' : '<p class="note">It took you ' + M.wonAt + ' ' + (M.wonAt === 1 ? 'waking' : 'wakings') + ' to reach the day after St Crispin\'s. The day holds. Your own work is not finished.</p>' + wantedHtml()) +
+    (S.oath && oathOf(S.oath) ? '<p class="note">' + (S.oathKept ? 'You swore ' + oathOf(S.oath).n.charAt(0).toLowerCase() + oathOf(S.oath).n.slice(1) + ', and you kept it.' + (S.oathKept === 2 ? ' The two at the bench have noted it: 4 lessons.' : '') : 'You swore ' + oathOf(S.oath).n.charAt(0).toLowerCase() + oathOf(S.oath).n.slice(1) + '. It was not kept.') + '</p>' : '') +
     othersHtml() + '<button class="go" type="button" data-act="camp">Wake on the quay once more, knowing what you know</button>' +
     '<button class="quiet" type="button" data-act="reset">' + (sure ? 'Sure? This forgets every waking.' : 'Forget everything and start as a stranger') + '</button>';
 }
@@ -3582,6 +3607,7 @@ function renderSheet() {
   let h = '<div><h3>' + (M.want ? esc(N()) + ', cordwainer\'s apprentice' : 'The man') + '</h3>' + (M.want ? '<p style="margin-bottom:8px">' + esc(WANT[M.want].keep) + '</p>' : '') + '<dl class="stats">' + ['arm', 'eye', 'wits', 'grit'].map(k => '<div><dt>' + STAT[k] + '</dt><dd>' + s[k] + '</dd></div>').join('') +
     '<div><dt>Coin</dt><dd>' + money(S.coin) + '</dd></div><div><dt>Sheaves</dt><dd>' + S.arrows + '</dd></div></dl></div>' +
     '<div><h3>Standing</h3><p>' + standingWord(S.standing) + (S.flags.baggage ? ', posted to the baggage' : S.flags.centre ? ', placed in the centre' : '') + '</p></div>' +
+    (S.oath && oathOf(S.oath) ? '<div><h3>Sworn</h3><p>' + esc(oathOf(S.oath).n) + '</p></div>' : '') +
     '<div><h3>Kit and company</h3><ul class="kit">';
   if (!S.items.length) h += '<li><small>A borrowed bow and what you stand up in.</small></li>';
   S.items.forEach(i => { h += '<li class="' + (ITEM[i].ill ? 'ill' : '') + '">' + esc(ITEM[i].n) + '<small>' + esc(ITEM[i].d) + '</small></li>'; });
@@ -3619,7 +3645,8 @@ const HOW = [
   [m => m.lived || m.known.k_centre || m.known.k_gloucester, 'Living through the battle is not enough. Something is wanted of you on that day. The page between wakings says as much of it as you have found out.'],
   [m => Object.values(m.done || {}).some(n => n >= FAST_AFTER), 'A part you have been through often enough can be walked through in a single choice. It is quicker, but you arrive with less: fewer chances to grow, to pick things up and to earn Standing.'],
   [m => m.known.k_home || m.how.left, 'Going home, or staying behind, does not end it.'],
-  [m => m.wins >= 1, 'There is more than one ending, and the first is not the last.']
+  [m => m.wins >= 1, 'There is more than one ending, and the first is not the last.'],
+  [m => m.wins >= 1, 'Once the Duke has been saved, you may swear an oath on the page between wakings. It makes the next waking harder, and it is kept only if you save him again.']
 ];
 function howM() { return M ? Object.assign({ how: {}, known: {}, seen: {}, done: {} }, M, { how: M.how || {} }) : { how: {}, known: {}, seen: {}, done: {}, runs: 0 }; }
 let howNew = {};
@@ -3686,6 +3713,7 @@ function codexHtml() {
   if (Object.keys(m.boons).length) h += '<p class="sub">What you have been taught</p><ul class="known">' + bn.filter(k => m.boons[k]).map(k => '<li>' + esc(ITEM[k].n) + '</li>').join('') + '</ul>' + (bn.some(k => !m.boons[k]) ? '<p class="note">' + bn.filter(k => !m.boons[k]).length + ' teachings not yet taken.</p>' : '');
   if (Object.keys(m.pos).length) h += '<p class="sub">Where you have stood on the day</p><ul class="known">' + [['wing', 'The right of the line'], ['centre', "The centre, by the King's battle"], ['baggage', 'The baggage, a mile behind']].map(([k, t]) => '<li>' + (m.pos[k] ? t : 'A place not yet stood in') + '</li>').join('') + '</ul>';
   if (m.runs >= 1) { const e = ENDINGS.filter(([f]) => f(m)); h += '<p class="sub">How it has ended</p><ul class="known">' + e.map(([, t]) => '<li>' + t + '</li>').join('') + '</ul>' + (e.length < ENDINGS.length ? '<p class="note">' + (ENDINGS.length - e.length === 1 ? 'One ending not yet found.' : (ENDINGS.length - e.length) + ' endings not yet found.') + '</p>' : ''); }
+  if (m.wins) { const ko = m.oaths || {}; h += '<p class="sub">Oaths kept</p>' + (OATHS.some(o => ko[o.id]) ? '<ul class="known">' + OATHS.filter(o => ko[o.id]).map(o => '<li>' + esc(o.n) + '</li>').join('') + '</ul>' : '') + (OATHS.some(o => !ko[o.id]) ? '<p class="note">' + OATHS.filter(o => !ko[o.id]).length + ' not yet kept. They are sworn on the page between wakings.</p>' : ''); }
   const ks = Object.keys(KNOW).filter(k => m.known[k]);
   if (ks.length && m.runs >= 1) h += '<p class="sub">What you know that no one else does</p><ul class="known">' + ks.map(k => '<li>' + esc(KNOW[k]) + ((M.knownAt || {})[k] ? ' <small class="src">Learned at: ' + esc(M.knownAt[k]) + '</small>' : '') + '</li>').join('') + '</ul>';
   const by = {}; Object.keys(m.deaths || {}).forEach(k => { const id = k.split(':')[0]; by[id] = (by[id] || 0) + m.deaths[k]; });
@@ -3707,14 +3735,14 @@ function screenHtml() {
   if (view === 'title') return '<p class="eyebrow"><span>Southampton to Agincourt, 1415</span></p><h1 class="bigtitle">Until Crispin\'s Day</h1>' +
     paras(sl && sl.M.runs >= 1 ? `You are a cordwainer's apprentice with a borrowed bow, the twentieth man in a company of twenty archers. You have died in France, and woken on the quay at Southampton with all of it still in your head. Something is wanted of you. You do not yet know what it is.` : `It is August 1415. The King is taking an army to France, and you have taken his sixpence. You know nothing about war, and you are about to learn.`) +
     (sl ? '<p class="note">' + esc(SLOT_NAME[STORE.active] + ': ' + slotLine(sl)) + '</p>' : '') +
-    '<div class="menu"><button class="go" type="button" data-act="play">' + (sl ? 'Continue' : 'Begin') + '</button><button class="choice" type="button" data-act="saves">Saved games</button><button class="choice" type="button" data-act="help">How it works</button></div>' +
-    '<p class="ver">Version 0.28. The game saves itself in this browser after every choice.</p>' +
+    '<div class="menu"><button class="go" type="button" data-act="play">' + (sl ? 'Continue' : 'Begin') + '</button><button class="choice" type="button" data-act="saves">Saved games</button><button class="choice" type="button" data-act="help">How it works</button>' + sndButton() + '</div>' +
+    '<p class="ver">Version 0.30. The game saves itself in this browser after every choice.</p>' +
     (typeof gtag === 'function' || FB ? '<p class="ver">This page counts plays, and keeps a note of your archer\'s name and how far he got, so the author can see how the game plays. It does not know who you are.</p>' : '') +
     '<p class="ver">© 2026 Neil Fletcher. Found something broken or odd? <a href="https://github.com/neilfletcher/until-crispins-day-play/issues" target="_blank" rel="noopener">Tell me here</a>.</p>';
   if (view === 'menu') return '<p class="eyebrow"><span>' + esc(SLOT_NAME[STORE.active]) + '</span></p><h2>Menu</h2><div class="menu">' +
     '<button class="go" type="button" data-act="resume">Back to the game</button>' +
     '<button class="choice" type="button" data-act="saves">Saved games<div class="tags"><span>save, load, copy or delete a game</span></div></button>' +
-    '<button class="choice" type="button" data-act="help">How it works</button>' +
+    '<button class="choice" type="button" data-act="help">How it works</button>' + sndButton() +
     (M ? '<button class="choice" type="button" data-act="codex">What you have seen<div class="tags"><span>people, places and endings found so far</span></div></button>' : '') +
     (inRun ? '<button class="choice" type="button" data-act="giveup">' + (sureKey === 'giveup' ? 'Sure? Press again to give up this waking.' : 'Give up this waking') + '<div class="tags"><span>wake on the quay now, keeping the lessons earned so far</span></div></button>' : '') +
     '<button class="choice" type="button" data-act="wipe">' + (sureKey === 'wipe' ? 'Sure? Press again. This erases the game in play.' : 'Start this game again from nothing') + '<div class="tags"><span class="dead">' + (M && M.runs >= 1 ? 'erases this game: wakings, lessons and memories' : 'erases this game') + '</span></div></button>' +
@@ -3736,8 +3764,96 @@ function screenHtml() {
     '<button class="go" type="button" data-act="back">Back</button>';
   return h;
 }
+/* ================= v0.30: sound. Made in the browser, no files; off until the player turns it on ================= */
+const SND = { on: false, ctx: null, master: null, beds: {}, bed: '', last: '', t: 0 };
+try { SND.on = localStorage.getItem('until-crispins-day-sound') === '1'; } catch (e) { /* no storage */ }
+const BEDS = {
+  soton:    { f: 500,  q: 0.6, type: 'lowpass',  g: 0.22, lfo: 0.13, depth: 0.154 },
+  harfleur: { f: 320,  q: 0.8, type: 'lowpass',  g: 0.22, lfo: 0.07, depth: 0.110, thud: 1 },
+  march:    { f: 420,  q: 1.4, type: 'bandpass', g: 0.35, lfo: 0.09, depth: 0.220 },
+  eve:      { rain: 1 },
+  battle:   { rain: 0.8, drone: 1 },
+  shop:     { f: 200,  q: 0.7, type: 'lowpass',  g: 0.11, lfo: 0.04, depth: 0.044, tap: 1 }
+};
+function sndStart() {
+  if (SND.ctx) { if (SND.ctx.state === 'suspended') SND.ctx.resume(); return true; }
+  const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return false;
+  try {
+    const c = SND.ctx = new AC();
+    SND.master = c.createGain(); SND.master.gain.value = 0.0001; SND.master.connect(c.destination);
+    SND.master.gain.exponentialRampToValueAtTime(0.9, c.currentTime + 1.5);
+    const len = c.sampleRate * 4, buf = c.createBuffer(1, len, c.sampleRate), d = buf.getChannelData(0);
+    let b = 0; for (let i = 0; i < len; i++) { const w = Math.random() * 2 - 1; b = (b + 0.02 * w) / 1.02; d[i] = w * 0.35 + b * 2.2; }
+    SND.noise = buf;
+    const mk = (secs, per, lo, hi) => { const n = Math.floor(c.sampleRate * secs), bf = c.createBuffer(1, n, c.sampleRate), x = bf.getChannelData(0);
+      for (let k = 0; k < secs * per; k++) { const at = Math.floor(Math.random() * (n - 2000)), a = Math.pow(Math.random(), 2.5) * 0.9 + 0.05, ln = Math.floor(c.sampleRate * (lo + Math.random() * (hi - lo)));
+        for (let j = 0; j < ln; j++) x[at + j] += (Math.random() * 2 - 1) * a * Math.pow(1 - j / ln, 3); }
+      return bf; };
+    SND.patter = mk(7.1, 26, 0.012, 0.035);
+    return true;
+  } catch (e) { SND.ctx = null; return false; }
+}
+function sndBed(key) {
+  if (!SND.ctx || SND.bed === key) return;
+  const c = SND.ctx, now = c.currentTime;
+  Object.keys(SND.beds).forEach(k => { const o = SND.beds[k]; o.out.gain.cancelScheduledValues(now); o.out.gain.setTargetAtTime(0.0001, now, 0.8); setTimeout(() => { try { o.stop(); } catch (e) {} }, 5000); delete SND.beds[k]; });
+  SND.bed = key; const B = BEDS[key]; if (!B) return;
+  const out = c.createGain(); out.gain.value = 0.0001; out.connect(SND.master);
+  if (B.rain) {
+    const nodes = [], layer = (buf, type, f, q, gain, lp) => { const sr = c.createBufferSource(); sr.buffer = buf; sr.loop = true; const f1 = c.createBiquadFilter(); f1.type = type; f1.frequency.value = f; f1.Q.value = q; const f2 = c.createBiquadFilter(); f2.type = 'lowpass'; f2.frequency.value = lp; const gg = c.createGain(); gg.gain.value = gain * B.rain; sr.connect(f1); f1.connect(f2); f2.connect(gg); gg.connect(out); sr.start(0, Math.random() * 2); nodes.push(sr); return gg; };
+    layer(SND.patter, 'bandpass', 520, 0.7, 0.55, 1400);
+    const wash = layer(SND.noise, 'bandpass', 900, 0.5, 0.13, 2200);
+    const sw = c.createOscillator(); sw.frequency.value = 0.06; const sg = c.createGain(); sg.gain.value = 0.04 * B.rain; sw.connect(sg); sg.connect(wash.gain); sw.start(); nodes.push(sw);
+    if (B.drone) [55, 55.4].forEach(f => { const o = c.createOscillator(); o.type = 'sine'; o.frequency.value = f; const og = c.createGain(); og.gain.value = 0.016; o.connect(og); og.connect(out); o.start(); nodes.push(o); });
+    out.gain.setTargetAtTime(1, now, 1.2);
+    SND.beds[key] = { out, stop: () => nodes.forEach(n => { try { n.stop(); } catch (e) {} }) };
+    return;
+  }
+  const src = c.createBufferSource(); src.buffer = SND.noise; src.loop = true;
+  const fl = c.createBiquadFilter(); fl.type = B.type; fl.frequency.value = B.f; fl.Q.value = B.q;
+  const g = c.createGain(); g.gain.value = B.g;
+  const lfo = c.createOscillator(); lfo.frequency.value = B.lfo; const lg = c.createGain(); lg.gain.value = B.depth; lfo.connect(lg); lg.connect(g.gain);
+  src.connect(fl); fl.connect(g); g.connect(out); src.start(); lfo.start();
+  const nodes = [src, lfo];
+  if (B.drone) [55, 55.7, 82.4].forEach((f, n) => { const o = c.createOscillator(); o.type = 'sine'; o.frequency.value = f; const og = c.createGain(); og.gain.value = n === 2 ? 0.035 : 0.07; o.connect(og); og.connect(out); o.start(); nodes.push(o); });
+  out.gain.setTargetAtTime(1, now, 1.2);
+  SND.beds[key] = { out, stop: () => nodes.forEach(n => { try { n.stop(); } catch (e) {} }) };
+}
+function sndTone(freq, dur, vol, partials, when) {
+  if (!SND.ctx) return; const c = SND.ctx, t = c.currentTime + (when || 0);
+  (partials || [1]).forEach((p, n) => { const o = c.createOscillator(); o.type = 'sine'; o.frequency.value = freq * p; const g = c.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol / (n + 1), t + 0.012); g.gain.exponentialRampToValueAtTime(0.0001, t + dur / (1 + n * 0.45)); o.connect(g); g.connect(SND.master); o.start(t); o.stop(t + dur + 0.1); });
+}
+function sndThud(when) {
+  if (!SND.ctx) return; const c = SND.ctx, t = c.currentTime + (when || 0), o = c.createOscillator(), g = c.createGain();
+  o.type = 'sine'; o.frequency.setValueAtTime(70, t); o.frequency.exponentialRampToValueAtTime(28, t + 0.5);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.16, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 1.4);
+  o.connect(g); g.connect(SND.master); o.start(t); o.stop(t + 1.5);
+}
+const BELL = [1, 2.0, 2.76, 5.4];
+function sndRender() {
+  if (!SND.on || !SND.ctx) return;
+  const inGame = view === 'game' && S;
+  const ph = inGame ? S.phase : '', key = !inGame ? (S && view !== 'title' ? S.act : 'soton') : ph === 'camp' ? 'shop' : (ph === 'dead' || ph === 'lived' || ph === 'won') ? '' : S.act;
+  if (key !== SND.bed) sndBed(key);
+  const mark = inGame ? ph + ':' + S.act + ':' + S.i + ':' + (M ? M.runs : 0) : SND.last;
+  if (mark !== SND.last) {
+    SND.last = mark;
+    if (ph === 'chapter') { sndTone(196, 5, 0.12, BELL); sndTone(196, 5, 0.09, BELL, 1.6); }
+    else if (ph === 'dead') sndTone(98, 7, 0.16, BELL);
+    else if (ph === 'lived') sndTone(147, 6, 0.11, BELL);
+    else if (ph === 'won') [0, 0.9, 1.8, 2.7].forEach((w, n) => sndTone([196, 147, 175, 131][n], 6, 0.10, BELL, w));
+    else if (BEDS[key] && BEDS[key].thud && ph === 'choose' && Math.random() < 0.6) sndThud(0.8 + Math.random() * 2);
+    else if (BEDS[key] && BEDS[key].tap) [0.6, 1.0, 1.4].forEach(w => sndTone(1400, 0.08, 0.03, [1, 1.9], w));
+  }
+}
+function sndToggle() {
+  SND.on = !SND.on; try { localStorage.setItem('until-crispins-day-sound', SND.on ? '1' : '0'); } catch (e) { /* no storage */ }
+  if (SND.on) { if (!sndStart()) SND.on = false; }
+  else if (SND.ctx) { sndBed(''); SND.bed = ''; SND.last = ''; }
+}
+const sndButton = () => '<button class="choice" type="button" data-act="sound" aria-pressed="' + (SND.on ? 'true' : 'false') + '">Sound: ' + (SND.on ? 'on' : 'off') + '<div class="tags"><span>' + (SND.on ? 'rain, wind and a bell; turn it off here' : 'rain, wind and a bell, made by the page itself') + '</span></div></button>';
 function render() {
-  document.body.dataset.view = view;
+  document.body.dataset.view = view; sndRender();
   if (view !== 'game') { const el = $('story'); el.innerHTML = screenHtml(); el.style.animation = 'none'; void el.offsetWidth; el.style.animation = ''; $('sheet').hidden = true; return; }
   renderTop(); renderStory(); renderSheet();
 }
@@ -3755,17 +3871,19 @@ document.addEventListener('keydown', e => {
   }
 });
 document.addEventListener('click', e => {
+  if (SND.on && (!SND.ctx || SND.ctx.state === 'suspended')) sndStart();
   const b = e.target.closest('[data-act]'); if (!b || b.disabled) return;
   const act = b.dataset.act;
   if (act !== 'reset') sure = false;
   const twice = key => { if (sureKey === key) { sureKey = ''; return true; } sureKey = key; return false; };
   const keep = sureKey; sureKey = '';
-  const nav = { saves: 1, help: 1, codex: 1, menu: 1, title: 1, back: 1, resume: 1, play: 1, 'slot-play': 1, 'slot-copy': 1, 'slot-del': 1, export: 1, copycode: 1, import: 1, giveup: 1, wipe: 1 };
+  const nav = { saves: 1, help: 1, codex: 1, menu: 1, title: 1, back: 1, resume: 1, play: 1, 'slot-play': 1, 'slot-copy': 1, 'slot-del': 1, export: 1, copycode: 1, import: 1, giveup: 1, wipe: 1, sound: 1 };
   if (nav[act]) {
     const i = Number(b.dataset.i);
     if (act !== 'import') importMsg = '';
     importText = ($('importTa') || {}).value || '';
-    if (act === 'play') { if (!M || !S || !STORE.slots[STORE.active]) openSlot(STORE.active); view = 'game'; }
+    if (act === 'sound') sndToggle();
+    else if (act === 'play') { if (!M || !S || !STORE.slots[STORE.active]) openSlot(STORE.active); view = 'game'; }
     else if (act === 'resume') view = M && S ? 'game' : 'title';
     else if (act === 'menu') { view = 'menu'; backTo = 'menu'; }
     else if (act === 'title') { view = 'title'; backTo = 'title'; }
@@ -3788,6 +3906,7 @@ document.addEventListener('click', e => {
   else if (act === 'go') goOn();
   else if (act === 'camp') { S.phase = 'camp'; const nx = BETWEEN[M.between || 0]; if (nx && nx.when()) { S.inter = M.between || 0; M.between = (M.between || 0) + 1; M.lessons += 2; } else S.inter = -1; save(); }
   else if (act === 'buy') buy(b.dataset.id);
+  else if (act === 'oath') { M.oathNext = M.oathNext === b.dataset.id ? '' : b.dataset.id; save(); }
   else if (act === 'begin') { newRun(); save(); }
   else if (act === 'reset') { if (sure) { sure = false; M = freshMeta(); newRun(); save(); } else sure = true; }
   render();
