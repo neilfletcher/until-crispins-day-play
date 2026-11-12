@@ -179,7 +179,7 @@ const DEATH_LINE = {
   eve: 'You are dead before the battle, which the others will later agree was the clever way to go about it.',
   battle: 'The mud takes you in as though it has been waiting, and it has.'
 };
-const HARD = { soton: 0, harfleur: 2, march: 2, eve: 2, battle: 6 };
+const HARD = { soton: 0, harfleur: 2, march: 2, eve: 2, battle: 7 };
 const STAT = { arm: 'Arm', eye: 'Eye', wits: 'Wits', grit: 'Grit' };
 const ITEM = {
   string:  { n: 'Dry string',         d: 'Waxed hemp, coiled under your cap.' },
@@ -2087,6 +2087,61 @@ Cutler shares out what is left in the company sack. It comes to a strip of dried
     lose: [`'On the ninth day, cobbler,' Cutler says, 'I stop answering questions.' He has had a great many of them since the sack came out.`, {}] }
 ]);
 
+/* ================= v0.17: builds. Three people each teach one thing, from a few on offer ================= */
+Object.assign(ITEM, {
+  bn_draw:    { n: 'The Welsh draw',          d: 'You bend the bow with your back, as Ieuan does. Shooting and heavy work go a little better.', b: { shoot: 1, labour: 1 } },
+  bn_gap:     { n: 'Shooting for the joints', d: 'Throat, armpit and eye slit, at thirty paces and nearer. Shooting at close range goes better.', b: { close: 2 } },
+  bn_horse:   { n: 'Shoot the horse',         d: 'A knight is a small thing on top of a large thing. Standing against the horse goes better.', b: { cav: 2 } },
+  bn_maul:    { n: 'Mallet work',             d: 'Do not swing it. Drop it. Hand-to-hand fighting goes better.', b: { melee: 2 } },
+  bn_stand:   { n: 'Where to stand',          d: 'Behind the stake, and never beside it. Standing against the horse and fighting hand to hand go a little better.', b: { cav: 1, melee: 1 } },
+  bn_camp:    { n: "An old soldier's habits", d: 'Boil it, dry your feet, sleep off the ground. You resist the flux better, and march a little better.', b: { flux: 2, march: 1 } },
+  bn_talk:    { n: 'A soft answer',           d: 'Ask for less than they feared, and thank them first. Talking people round goes better.', b: { talk: 2 } },
+  bn_shriven: { n: 'Shriven',                 d: 'Your account is settled. One more wound in you.', hp: 1 },
+  bn_walk:    { n: "The friar's way of walking", d: 'Bound feet, short steps, and no noise. Marching goes better, and going unseen a little better.', b: { march: 2, sneak: 1 } }
+});
+function offer(who, n, all) {
+  S.offer = S.offer || {};
+  if (!S.offer[who]) { const ix = [...Array(n).keys()].map(k => [k, rnd()]).sort((a, b) => a[1] - b[1]).map(x => x[0]); S.offer[who] = all ? ix : ix.slice(0, 3); }
+  note('boon');
+}
+const offered = (who, k) => !S.offer || !S.offer[who] || S.offer[who].includes(k);
+scene('boon_ieuan', 'soton', 'What the Welshman knows', `Ieuan has been watching you shoot for days and has said nothing about it, which you had taken for contempt. Now he puts down his fletching and comes over.
+
+'You'll not be an archer by the time we sail,' he says. 'Nobody is made one in a week. It takes from seven years old. But there is one thing I can put into you before the ships, if you choose it well and work at nothing else. So choose.'`, [
+  { t: 'How to draw', if: () => offered('ieuan', 0),
+    out: [`'You draw with your arm. Stop it.' He puts his hand flat between your shoulder blades and pushes. 'There. That is where the bow lives.' For three days he has you bending it by stepping into it, as a man leans on a door. On the fourth your shafts are flying ten paces further than they did, and you are not out of breath.`, { item: 'bn_draw', pull: ['ieuan', 1] }] },
+  { t: 'How to shoot a man in plate', if: () => offered('ieuan', 1),
+    out: [`He scratches a helmet in the dirt with an arrow. 'Not at him. A man in harness is a wall. You shoot at where the wall is jointed.' Throat. Armpit, when the arm goes up. The eye slit, if you are near and God is kind. 'Thirty paces and nearer,' he says. 'Further off than that, shoot his horse, and save your good heads.'`, { item: 'bn_gap', pull: ['ieuan', 1] }] },
+  { t: 'How to stop a horse', if: () => offered('ieuan', 2),
+    out: [`'A knight is a small thing on top of a large thing,' Ieuan says. 'Shoot the large thing.' Not the head, which is armoured and does not care. The chest as it comes on, and the flank as it turns. A horse that is hurt will not go forward for any spur, and it will take the man with it. He has you shoot at a hurdle with a blanket over it until you stop aiming at where the rider would be.`, { item: 'bn_horse', pull: ['ieuan', 1] }] },
+  { t: 'How to keep a string', if: () => offered('ieuan', 3) && !has('string'),
+    out: [`He gives you a string of his own twisting, waxed until it shines, and shows you how to coil it and where to keep it: under the cap, against the hair, where a man is driest. 'A wet string is a dead archer,' he says. 'Every fool carries a bow. The ones who go home are carrying two strings.' He adds a sheaf of his own shafts, as an afterthought.`, { item: 'string', ar: 1, pull: ['ieuan', 1] }] }
+], { enter: () => offer('ieuan', 4, S.pull.ieuan >= 3) });
+scene('boon_cutler', 'harfleur', 'What Cutler knows', `Cutler comes along the trench after the count and sits down on the fire step beside you, which he has not done before. He has lost men this week, and he has the look of somebody working a sum.
+
+'I can't make soldiers of the lot of you,' he says. 'There isn't the time. I can make each of you good at one thing. So what do you want to be good at, cobbler, when it comes to it?'`, [
+  { t: 'Close work', if: () => offered('cutler', 0),
+    out: [`'The bow is for when they are over there,' he says. 'Sooner or later they are over here.' He puts a lead maul into your hands, the kind used for driving stakes. 'Don't swing it like an axe. You'll never get it back. Drop it. Knees first, and the helm when he is down.' He has you drop it on a post for an hour a day until the post is a stump.`, { item: 'bn_maul', pull: ['cutler', 1] }] },
+  { t: 'Standing when the horse comes', if: () => offered('cutler', 1),
+    out: [`He drives a stake and makes you stand behind it, and then walks at you, quite slowly, with a spade held like a lance. Every time, you step sideways. Every time, he hits you with the spade. 'Behind it,' he says. 'Never beside it. The stake is the only friend you have on that field and you keep leaving him.' By the end of the week you have stopped stepping.`, { item: 'bn_stand', pull: ['cutler', 1] }] },
+  { t: 'Staying alive between the fights', if: () => offered('cutler', 2),
+    out: [`'More of mine have died of the ditch than of the French,' Cutler says. It is the longest speech you have had from him, and it is all rules. Boil what you drink. Dry your feet whenever you stop. Sleep off the ground if it is only on two bundles of brushwood. Eat what you are given when you are given it. He makes you say them back. Then he watches, for a week, to see whether you do them.`, { item: 'bn_camp', pull: ['cutler', 1] }] },
+  { t: 'Being a man you can use', if: () => offered('cutler', 3),
+    out: [`He looks at you for some time. 'Then do what I say the first time I say it,' he says, 'and be where I look when I look.' He takes you for his runner for a week. You carry his messages and his tally and once, memorably, his boots. By the end of it he has stopped calling you cobbler in front of the others, and started using your name.`, { st: 2, pull: ['cutler', 1] }] }
+], { enter: () => offer('cutler', 4, S.standing >= 4) });
+scene('boon_friar', 'march', 'What the friar knows', `The Franciscan from the quay at Southampton has come to France after all, with a chaplain's licence and the same tray, and has walked every mile of it in sandals. He falls in beside you on the road as if by accident.
+
+'I have been watching you, my son,' he says. 'You have the look of a man who expects the worst and means to be present when it comes. I have very little to give anybody. Still, a friar learns one or two things that a soldier does not.'`, [
+  { t: 'How to talk to anybody', if: () => offered('friar', 0),
+    out: [`'It is a beggar's trade, and I am a beggar by profession,' he says. Ask for less than they feared. Thank them before they have agreed. Never let a man feel he has lost, and he will give you his cloak. He has you practise on a provost's serjeant, who parts with half a loaf and seems pleased to have done it. You watch the friar bless him, and understand that you have been taught by a master.`, { item: 'bn_talk' }] },
+  { t: 'How to be ready', if: () => offered('friar', 1),
+    out: [`He hears your confession on the march, walking, with his hood up, and he does not let you hurry it. It takes four miles. At the end he gives you the words, and you find, to your surprise, that something has been put down which you had been carrying. 'A man whose account is settled stands straighter,' he says. 'I have seen it turn a blade. I do not say how.'`, { item: 'bn_shriven' }] },
+  { t: 'How to walk', if: () => offered('friar', 2),
+    out: [`He has walked from Assisi to Compostela and back, he says, and from there to Southampton, on these same feet. He shows you how to bind yours with a strip of linen and a smear of tallow, how to shorten your step on the stones, and how to go so quietly that a sentry yawns as you pass. 'Francis preached to the birds,' he says. 'One has to get close to a bird.'`, { item: 'bn_walk' }] },
+  { t: 'Whether he has any money', if: () => offered('friar', 3),
+    out: [`He laughs so that the men in front turn round. Then he counts sixpence into your hand from the purse under his habit. 'An archer gave me that at Harfleur, to pray for him,' he says. 'He no longer needs the prayers, and you need the sixpence. I shall tell the saints it was the same thing.'`, { c: 6 }] }
+], { enter: () => offer('friar', 4, has('badge')) });
+
 /* ================= v0.10: other versions of the scenes every waking passes through ================= */
 const ALT = {
   sail: ['sail', 'sail_b', 'sail_c'], landing: ['landing', 'landing_b'], m_open: ['m_open', 'm_open_b'], somme: ['somme', 'somme_b'], night: ['night', 'night_b'],
@@ -2227,16 +2282,16 @@ function newRun() {
   const q = (id, d, a) => ({ id, d: d || '', a: a || '' });
   S.queue = [...(M.want ? [] : [q('origin')]),
     ...(M.runs < 1
-      ? [q('wake', '1 August'), q('s_billet', '1 August'), q('s_drill', '2 August'), q('T', '3 August', 'soton'), q('I', '4 August', 'soton'), q('home_s', '5 August'), q('I', '7 August', 'soton'), q('T', '8 August', 'soton')]
-      : [q('wake', '1 August'), q('T', '3 August', 'soton'), q('I', '5 August', 'soton'), q('home_s', '7 August'), q('T', '9 August', 'soton')]),
+      ? [q('wake', '1 August'), q('s_billet', '1 August'), q('s_drill', '2 August'), q('T', '3 August', 'soton'), q('I', '4 August', 'soton'), q('home_s', '5 August'), q('boon_ieuan', '6 August'), q('I', '7 August', 'soton'), q('T', '8 August', 'soton')]
+      : [q('wake', '1 August'), q('T', '3 August', 'soton'), q('I', '5 August', 'soton'), q('boon_ieuan', '6 August'), q('home_s', '7 August'), q('T', '9 August', 'soton')]),
     q('fire_s', '10 August'), q('sail', '11 August'),
     ...((M.far || 0) < 1
-      ? [q('landing', '14 August'), q('h_camp', '18 August'), q('h_first', '21 August'), q('T', '24 August', 'harfleur'), q('I', '28 August', 'harfleur'), q('home_h', '4 September'), q('I', '8 September', 'harfleur'), q('T', '11 September', 'harfleur')]
-      : [q('landing', '14 August'), q('T', '21 August', 'harfleur'), q('I', '28 August', 'harfleur'), q('home_h', '4 September'), q('T', '11 September', 'harfleur')]),
+      ? [q('landing', '14 August'), q('h_camp', '18 August'), q('h_first', '21 August'), q('T', '24 August', 'harfleur'), q('I', '28 August', 'harfleur'), q('boon_cutler', '1 September'), q('home_h', '4 September'), q('I', '8 September', 'harfleur'), q('T', '11 September', 'harfleur')]
+      : [q('landing', '14 August'), q('T', '21 August', 'harfleur'), q('I', '28 August', 'harfleur'), q('boon_cutler', '1 September'), q('home_h', '4 September'), q('T', '11 September', 'harfleur')]),
     q('fire_h', '17 September'), q('flux', '22 September'),
     ...((M.far || 0) < 2
-      ? [q('m_open', '8 October'), q('m_day', '9 October'), q('T', '11 October', 'march'), q('I', '12 October', 'march'), q('I', '14 October', 'march'), q('home_m', '15 October'), q('m_eighth', '16 October'), q('T', '17 October', 'march')]
-      : [q('m_open', '8 October'), q('T', '11 October', 'march'), q('I', '13 October', 'march'), q('home_m', '15 October'), q('T', '17 October', 'march')]),
+      ? [q('m_open', '8 October'), q('m_day', '9 October'), q('T', '11 October', 'march'), q('I', '12 October', 'march'), q('I', '14 October', 'march'), q('home_m', '15 October'), q('m_eighth', '16 October'), q('T', '17 October', 'march'), q('boon_friar', '18 October')]
+      : [q('m_open', '8 October'), q('T', '11 October', 'march'), q('I', '13 October', 'march'), q('home_m', '15 October'), q('T', '17 October', 'march'), q('boon_friar', '18 October')]),
     q('somme', '19 October'), q('fire_m', '23 October'),
     q('T', '24 October', 'eve'), q('home_e', '24 October'), q('I', '24 October', 'eve'), q('night', '24 October'),
     ...['b_wait', 'b_dawn', 'b_horse', 'BM', 'b_advance', 'b_close', 'BM', 'b_melee', 'b_hero', 'b_order'].map(x => q(x, '25 October'))];
@@ -2357,7 +2412,7 @@ function apply(fx, L) {
   if (fx.sus) S.sus = Math.max(0, S.sus + fx.sus);
   if (fx.fast) {
     const end = { soton: 'sail', harfleur: 'flux', march: 'somme' }[fx.fast], k = S.queue.findIndex((e, n) => n > S.i && e.id === end);
-    if (k > S.i) { const cut = S.queue.slice(S.i + 1, k); S.queue.splice(S.i + 1, cut.length, { id: 'fast_' + fx.fast, d: cut.length ? cut[0].d : '', a: '' }, ...cut.filter(e => /^home_/.test(e.id))); }
+    if (k > S.i) { const cut = S.queue.slice(S.i + 1, k); S.queue.splice(S.i + 1, cut.length, { id: 'fast_' + fx.fast, d: cut.length ? cut[0].d : '', a: '' }, ...cut.filter(e => /^(home|boon)_/.test(e.id))); }
   }
   if (fx.unflag) [].concat(fx.unflag).forEach(f => { delete S.flags[f]; });
   if (fx.want) { M.want = fx.want; const k = WANT[fx.want].stat; S.stats[k] += 1; L.push([M.runs >= 1 ? 'You start every waking with +1 ' + STAT[k] : 'You start with +1 ' + STAT[k], M.runs >= 1 ? 'mem' : '']); L.push(['You carry: ' + WANT[fx.want].keep, '']); }
@@ -2431,7 +2486,7 @@ const WANT_ASK = {
   vow: "have left your offering at the cobblers' altar in Southampton, and heard out the man from Soissons on the march"
 };
 /* Anonymous play counts. Only the public release loads the analytics tag; everywhere else this does nothing. */
-function track(name, p) { try { if (typeof gtag === 'function') gtag('event', name, Object.assign({ waking: M ? M.runs + (S && S.banked ? 0 : 1) : 0, version: '0.16' }, p || {})); } catch (e) {} }
+function track(name, p) { try { if (typeof gtag === 'function') gtag('event', name, Object.assign({ waking: M ? M.runs + (S && S.banked ? 0 : 1) : 0, version: '0.17' }, p || {})); } catch (e) {} }
 /* The author's record of how games go. Only the public release has the settings for it; everywhere else this does nothing. */
 const FB = {"projectId": "until-crispins-day", "apiKey": "AIzaSyC8t1QwGPsrX5cJ6TzwcXrVU6s4rzvFJnU"};
 function fbv(v) {
@@ -2447,7 +2502,7 @@ function report() {
     if (!M.pid) M.pid = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
     if (!M.startedAt) M.startedAt = new Date().toISOString();
     const seen = M.seen || {};
-    const doc = { name: String(M.name || '').slice(0, 30), want: M.want || '', version: '0.16', started: M.startedAt, updated: new Date().toISOString(),
+    const doc = { name: String(M.name || '').slice(0, 30), want: M.want || '', version: '0.17', started: M.startedAt, updated: new Date().toISOString(),
       runs: M.runs || 0, far: M.far || 0, wins: M.wins || 0, wonAt: M.wonAt || 0, trueAt: M.trueAt || 0, lived: M.lived || 0,
       scenes: Object.values(seen).reduce((a, b) => a + b, 0), seen: seen, ends: M.ends || {}, lastEnd: M.lastEnd || '', found: Object.keys(M.how || {}).length };
     const f = {}; Object.keys(doc).forEach(k => { f[k] = fbv(doc[k]); });
@@ -2711,6 +2766,7 @@ const HOW = [
   [m => m.how.kit, 'What you pick up stays with you, and quietly betters your chances at the things it is good for.'],
   [m => m.how.standing, 'Standing is what Vintenar Cutler thinks of you. It decides what he asks of you, and where he puts you.'],
   [m => m.how.grow, 'What you do on the road can raise your Arm, Eye, Wits or Grit. Each of them will grow twice, and no further.'],
+  [m => m.how.boon, 'Three people on the road will each teach you one thing, from a few they offer. What you take from them decides what you are good at by the end. A man who thinks well of you offers more.'],
   [m => m.how.fire, 'Who you spend your evenings with decides whose troubles find you next.'],
   [m => m.runs >= 1, 'When you die, you wake on the quay at Southampton on the first of August, and nobody else remembers.'],
   [m => m.runs >= 1, 'Each waking earns lessons. You spend them between wakings, and what they buy stays with you.'],
@@ -2744,7 +2800,7 @@ function screenHtml() {
     paras(sl && sl.M.runs >= 1 ? `You are a cordwainer's apprentice with a borrowed bow, the twentieth man in a company of twenty archers. You have died in France, and woken on the quay at Southampton with all of it still in your head. Something is wanted of you. You do not yet know what it is.` : `It is August 1415. The King is taking an army to France, and you have taken his sixpence. You know nothing about war, and you are about to learn.`) +
     (sl ? '<p class="note">' + esc(SLOT_NAME[STORE.active] + ': ' + slotLine(sl)) + '</p>' : '') +
     '<div class="menu"><button class="go" type="button" data-act="play">' + (sl ? 'Continue' : 'Begin') + '</button><button class="choice" type="button" data-act="saves">Saved games</button><button class="choice" type="button" data-act="help">How it works</button></div>' +
-    '<p class="ver">Version 0.16. The game saves itself in this browser after every choice.</p>' +
+    '<p class="ver">Version 0.17. The game saves itself in this browser after every choice.</p>' +
     (typeof gtag === 'function' || FB ? '<p class="ver">This page counts plays, and keeps a note of your archer\'s name and how far he got, so the author can see how the game plays. It does not know who you are.</p>' : '') +
     '<p class="ver">© 2026 Neil Fletcher. Found something broken or odd? <a href="https://github.com/neilfletcher/until-crispins-day-play/issues" target="_blank" rel="noopener">Tell me here</a>.</p>';
   if (view === 'menu') return '<p class="eyebrow"><span>' + esc(SLOT_NAME[STORE.active]) + '</span></p><h2>Menu</h2><div class="menu">' +
