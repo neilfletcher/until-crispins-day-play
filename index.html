@@ -1988,6 +1988,40 @@ const DAYS = {
   march: ['Fifteen miles, and then seventeen, and then fifteen again. The country is empty before you get to it, and the bridges are down.', 'Rain. The road is a ditch and the ditch is a stream. Nobody has been dry since the Bresle.', 'The French are on the far bank of the river, riding level with you. You can see their pennons when the mist lifts.', 'The talk in the column has stopped. Men walk with their heads down and watch the heels of the man in front.', 'Somebody has counted the days since Harfleur and somebody else has told him to keep it to himself.']
 };
 
+/* ================= v0.15: a proper first day ================= */
+scene('s_billet', 'soton', 'The sail loft', `By the end of that first day the twenty has been found a billet: a sail loft over a chandler's in French Street, with a ladder for a door and the smell of tarred hemp in everything. Cutler takes the place by the hatch, where nobody can come or go without stepping over him. The rest sort themselves out as men do.
+
+Ieuan, a grey Welshman who is the oldest of the twenty and by every account the best shot in it, has the corner under the window, and is asleep or wishes to be thought so. Jankin Reeve, who has been a soldier since the Welsh wars, has the driest boards and a clear space round him that nobody seems anxious to fill. Old Simkin and Hodge are arguing about a blanket, as they have apparently argued about it on three campaigns. Perkin has kept you a place by lying across two.
+
+There is room in four places. Where a new man puts his blanket down is noticed, and it is remembered.`, [
+  { t: 'Next to Perkin, who kept it for you',
+    out: [`He rolls over to make room and goes on talking as if you had been there all along. Within the hour you have heard what he thinks of the ships, the Welshman, the price of ale and a girl in Kingsgate Street. It is like lying down next to a brook. You find, somewhat to your surprise, that you sleep.`, { flag: 'bond', pull: ['perkin', 2], heal: 1, say: 'Perkin will keep close to you.' }] },
+  { t: 'Under the window, by the Welshman',
+    out: [`Ieuan opens one eye. 'Do you snore?' You say you do not know. 'You will know tomorrow,' he says. 'I'll tell you.' Some time later, into the dark, he asks what weight of bow you draw, and you have to say that you do not know that either. There is a silence. 'Well, that's honest,' he says. 'We'll find out.'`, { pull: ['ieuan', 2] }] },
+  { t: 'By the hatch, in the draught, near Cutler',
+    out: [`Cutler looks at the blanket and then at you. 'Draught,' he says, and that is all. But later, without turning over, he says, 'First man up fetches the water. That's you, now.' It takes you a moment to see that you have been given a job, and that in this company a job is a kind of place.`, { st: 1, pull: ['cutler', 1] }] },
+  { t: 'In the space by Reeve, since nobody else wants it',
+    out: [`'Brave lad,' Reeve says, pleasantly, and shifts his pack an inch. He is very easy to talk to. By the time you sleep he knows your name, your street, your master's trade and roughly what the shop is worth. You know that he once served under Lord Grey, and nothing else whatever. You work this out some time after he has started to snore.`, { wits: 1, pull: ['reeve', 2] }] }
+], { when: () => M.runs < 1 });
+scene('s_drill', 'soton', "Cutler's line", `Cutler has the twenty out on the common beyond the Bargate, in one line, with bows strung, and he walks along it as a man walks along a fence looking for the rotten post. He is not interested, today, in whether anyone can hit anything. He wants to see twenty men nock, draw and loose together on a word, and go on doing it until he says stop.
+
+'A man shooting on his own is a poacher,' he says. 'Twenty shooting on a word is a reason for a Frenchman to stay at home.' Ieuan is on your left, and does it as he breathes. Perkin is on your right, and has already dropped an arrow. Reeve, further down, is doing exactly as much as will not be noticed. The word is given.`, [
+  { t: 'Keep time with Ieuan, whatever it costs your arms', test: ['arm', 7, 'labour'],
+    win: [`By the fortieth shaft your shoulders are shaking and there is blood on the string. But you are still on the word when Cutler calls the halt. He stops in front of you, looks at your fingers and then at your face, and moves on down the line. Ieuan says that is the most anybody has had out of him since Lent.`, { st: 1, grit: 1 }],
+    lose: [`Your arms go at the thirtieth. You loose half a beat late, and Cutler hears it without turning his head. 'Cobbler. Again. On your own.' You do it on your own, in front of the twenty, until he is tired of watching. Nobody laughs, which is worse.`, { st: -1 }] },
+  { t: 'Loose every second word, and watch how it is done', test: ['eye', 7],
+    win: [`Nobody notices, since you are careful about it, and for a whole sheaf you watch: where Ieuan puts his feet, when he breathes, how the old hands let the bow do the drawing. By the second sheaf you have the trick of it, or the start of the trick. You are on the word with the rest, and it costs you half of what it costs Perkin.`, { wits: 1 }],
+    lose: [`Cutler notices. Cutler has been noticing that particular dodge for twenty years. He stands behind you for the whole of the next sheaf and says 'loose' into your ear, by yourself, a moment before he says it to anybody else.`, { st: -1 }] },
+  { t: "Get your foot on Perkin's arrow before Cutler sees it",
+    out: [`You have it under your boot and then in your hand, and it is back in his belt before Cutler turns at the end of the line. It costs you your place in the count and one late shot. Perkin looks at you as if you had pulled him out of a river. You tell him to keep his eyes to the front.`, { flag: 'bond', pull: ['perkin', 1], say: 'Perkin will keep close to you.' }] }
+], { when: () => M.runs < 1 });
+const LINK = {
+  perkin: ['Perkin has not stopped talking since. You have learned the names of all his sisters.', 'Perkin is somewhere behind you, whistling something he cannot get right.', 'You can still hear Perkin two streets off. Everybody can.'],
+  ieuan: ['Ieuan has gone back to his corner and his fletching, and has not said whether he thinks better or worse of you.', 'The Welshman is humming again. It is the same four notes, and he does not seem to know that he does it.', 'Ieuan has said nothing more about it. He seldom says a thing twice.'],
+  cutler: ['Cutler has gone back to counting whatever it is he counts on his fingers.', "You can feel Cutler's eye on your back for the rest of that day. It is not unfriendly. It is not friendly either.", 'Cutler has said nothing since. The twenty tells you that is how a man knows where he stands, if he knows how to read it.'],
+  reeve: ['Reeve nods to you across the loft afterwards, as a man nods to something he has put by for later.', 'You find that you have checked your purse twice since talking to Reeve, and that he has seen you do it both times.', 'Reeve is being pleasant to somebody else now. You watch how he does it.']
+};
+
 /* ================= v0.10: other versions of the scenes every waking passes through ================= */
 const ALT = {
   sail: ['sail', 'sail_b', 'sail_c'], landing: ['landing', 'landing_b'], m_open: ['m_open', 'm_open_b'], somme: ['somme', 'somme_b'], night: ['night', 'night_b'],
@@ -2127,7 +2161,10 @@ function newRun() {
     .map(s => [s.id, rnd() * (1 + 0.7 * (M.seen[s.id] || 0))]).sort((a, b) => a[1] - b[1]).slice(0, n).map(x => x[0]);
   const q = (id, d, a) => ({ id, d: d || '', a: a || '' });
   S.queue = [...(M.want ? [] : [q('origin')]),
-    q('wake', '1 August'), q('T', '3 August', 'soton'), q('I', '5 August', 'soton'), q('home_s', '7 August'), q('T', '9 August', 'soton'), q('fire_s', '10 August'), q('sail', '11 August'),
+    ...(M.runs < 1
+      ? [q('wake', '1 August'), q('s_billet', '1 August'), q('s_drill', '2 August'), q('T', '3 August', 'soton'), q('I', '4 August', 'soton'), q('home_s', '5 August'), q('I', '7 August', 'soton'), q('T', '8 August', 'soton')]
+      : [q('wake', '1 August'), q('T', '3 August', 'soton'), q('I', '5 August', 'soton'), q('home_s', '7 August'), q('T', '9 August', 'soton')]),
+    q('fire_s', '10 August'), q('sail', '11 August'),
     q('landing', '14 August'), q('T', '21 August', 'harfleur'), q('I', '28 August', 'harfleur'), q('home_h', '4 September'), q('T', '11 September', 'harfleur'), q('fire_h', '17 September'), q('flux', '22 September'),
     q('m_open', '8 October'), q('T', '11 October', 'march'), q('I', '13 October', 'march'), q('home_m', '15 October'), q('T', '17 October', 'march'), q('somme', '19 October'), q('fire_m', '23 October'),
     q('T', '24 October', 'eve'), q('home_e', '24 October'), q('I', '24 October', 'eve'), q('night', '24 October'),
@@ -2175,8 +2212,10 @@ function makeBridge() {
   const k = S.echo.findIndex(e => !e.at || e.at === S.act);
   if (k >= 0) out.push(S.echo.splice(k, 1)[0].t);
   if (S.hurt < 0 && S.blood > 0) out.push(S.blood === 1 ? LOW : WOUNDS[(S.idle++) % WOUNDS.length]);
-  else if (!out.length && M.want && (S.act === 'soton' || S.act === 'harfleur') && S.i > 2 && rnd() < 0.3) { S.said = S.said || {}; const pool = (IDLE[M.want] || []).map((l, n) => [l, n]).filter(([, n]) => !S.said[n]); if (pool.length) { const [l, n] = pool[Math.floor(rnd() * pool.length)]; S.said[n] = 1; out.push(typeof l === 'function' ? l() : l); } }
-  if (!out.length && DAYS[S.act] && S.i > 1 && S.phase !== 'chapter' && rnd() < 0.5) { S.days = S.days || {}; const pool = DAYS[S.act].map((l, n) => [l, n]).filter(([, n]) => !S.days[S.act + n]); if (pool.length) { const [l, n] = pool[Math.floor(rnd() * pool.length)]; S.days[S.act + n] = 1; out.push(l); } }
+  else if (!out.length && M.want && (S.act === 'soton' || S.act === 'harfleur') && S.i > 4 && rnd() < 0.3) { S.said = S.said || {}; const pool = (IDLE[M.want] || []).map((l, n) => [l, n]).filter(([, n]) => !S.said[n]); if (pool.length) { const [l, n] = pool[Math.floor(rnd() * pool.length)]; S.said[n] = 1; out.push(typeof l === 'function' ? l() : l); } }
+  if (!out.length && S.act === 'soton' && S.prevWith && LINK[S.prevWith] && S.prevWith !== S.withWho && (S.prevWith !== 'perkin' || perkinHere()) && rnd() < 0.7) { S.days = S.days || {}; const pool = LINK[S.prevWith].map((l, n) => [l, n]).filter(([, n]) => !S.days['l' + S.prevWith + n]); if (pool.length) { const [l, n] = pool[Math.floor(rnd() * pool.length)]; S.days['l' + S.prevWith + n] = 1; out.push(l); } }
+  const cid = S.queue[S.i] ? S.queue[S.i].id : '', close = cid === 's_billet' || cid === 's_drill' || (S.i > 0 && S.queue[S.i - 1] && S.queue[S.i].d === S.queue[S.i - 1].d);
+  if (!out.length && !close && DAYS[S.act] && S.i > 1 && S.phase !== 'chapter' && rnd() < 0.5) { S.days = S.days || {}; const pool = DAYS[S.act].map((l, n) => [l, n]).filter(([, n]) => !S.days[S.act + n]); if (pool.length) { const [l, n] = pool[Math.floor(rnd() * pool.length)]; S.days[S.act + n] = 1; out.push(l); } }
   S.hurt = 0; S.bridge = out.join(' ');
 }
 function enter() {
@@ -2196,6 +2235,7 @@ function enter() {
     M.seen[sc.id] = (M.seen[sc.id] || 0) + 1;
     S.date = e.d; S.played[sc.id] = 1;
     if (sc.thread) S.pull[sc.thread] += 1;
+    S.prevWith = S.withWho || ''; S.withWho = sc.thread || '';
     S.seenN = M.seen[sc.id] - 1;
     makeBridge();
     if (!S.chap) { S.chap = {}; ACTS.slice(0, ACTS.indexOf(S.act) + (S.i > 0 ? 1 : 0)).forEach(a => { S.chap[a] = 1; }); }
@@ -2320,7 +2360,7 @@ const WANT_ASK = {
   vow: "have left your offering at the cobblers' altar in Southampton, and heard out the man from Soissons on the march"
 };
 /* Anonymous play counts. Only the public release loads the analytics tag; everywhere else this does nothing. */
-function track(name, p) { try { if (typeof gtag === 'function') gtag('event', name, Object.assign({ waking: M ? M.runs + (S && S.banked ? 0 : 1) : 0, version: '0.14' }, p || {})); } catch (e) {} }
+function track(name, p) { try { if (typeof gtag === 'function') gtag('event', name, Object.assign({ waking: M ? M.runs + (S && S.banked ? 0 : 1) : 0, version: '0.15' }, p || {})); } catch (e) {} }
 /* The author's record of how games go. Only the public release has the settings for it; everywhere else this does nothing. */
 const FB = {"projectId": "until-crispins-day", "apiKey": "AIzaSyC8t1QwGPsrX5cJ6TzwcXrVU6s4rzvFJnU"};
 function fbv(v) {
@@ -2336,7 +2376,7 @@ function report() {
     if (!M.pid) M.pid = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
     if (!M.startedAt) M.startedAt = new Date().toISOString();
     const seen = M.seen || {};
-    const doc = { name: String(M.name || '').slice(0, 30), want: M.want || '', version: '0.14', started: M.startedAt, updated: new Date().toISOString(),
+    const doc = { name: String(M.name || '').slice(0, 30), want: M.want || '', version: '0.15', started: M.startedAt, updated: new Date().toISOString(),
       runs: M.runs || 0, far: M.far || 0, wins: M.wins || 0, wonAt: M.wonAt || 0, trueAt: M.trueAt || 0, lived: M.lived || 0,
       scenes: Object.values(seen).reduce((a, b) => a + b, 0), seen: seen, ends: M.ends || {}, lastEnd: M.lastEnd || '', found: Object.keys(M.how || {}).length };
     const f = {}; Object.keys(doc).forEach(k => { f[k] = fbv(doc[k]); });
@@ -2633,7 +2673,7 @@ function screenHtml() {
     paras(sl && sl.M.runs >= 1 ? `You are a cordwainer's apprentice with a borrowed bow, the twentieth man in a company of twenty archers. You have died in France, and woken on the quay at Southampton with all of it still in your head. Something is wanted of you. You do not yet know what it is.` : `It is August 1415. The King is taking an army to France, and you have taken his sixpence. You know nothing about war, and you are about to learn.`) +
     (sl ? '<p class="note">' + esc(SLOT_NAME[STORE.active] + ': ' + slotLine(sl)) + '</p>' : '') +
     '<div class="menu"><button class="go" type="button" data-act="play">' + (sl ? 'Continue' : 'Begin') + '</button><button class="choice" type="button" data-act="saves">Saved games</button><button class="choice" type="button" data-act="help">How it works</button></div>' +
-    '<p class="ver">Version 0.14. The game saves itself in this browser after every choice.</p>' +
+    '<p class="ver">Version 0.15. The game saves itself in this browser after every choice.</p>' +
     (typeof gtag === 'function' || FB ? '<p class="ver">This page counts plays, and keeps a note of your archer\'s name and how far he got, so the author can see how the game plays. It does not know who you are.</p>' : '') +
     '<p class="ver">© 2026 Neil Fletcher. Found something broken or odd? <a href="https://github.com/neilfletcher/until-crispins-day-play/issues" target="_blank" rel="noopener">Tell me here</a>.</p>';
   if (view === 'menu') return '<p class="eyebrow"><span>' + esc(SLOT_NAME[STORE.active]) + '</span></p><h2>Menu</h2><div class="menu">' +
