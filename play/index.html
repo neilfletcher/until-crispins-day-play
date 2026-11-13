@@ -214,7 +214,7 @@ const ITEM = {
   maul:    { n: 'Lead maul',          d: 'Five pounds of argument.', b: { melee: 2 } },
   dagger:  { n: 'Rondel dagger',      d: 'Taken underground.', b: { melee: 1 } },
   boots:   { n: 'Sound boots',        d: 'Your own work. They will last.', b: { march: 1 } },
-  badge:   { n: "The cobblers' badge", d: 'Crispin and Crispinian. Turns one failure.' },
+  badge:   { n: "The cobblers' badge", d: 'Crispin and Crispinian. Once, when you fail at something that would cost you blood, or at anything in the battle, it gives you a second try. Then it cracks.' },
   beer:    { n: 'Small-beer habit',   d: 'Nothing a brewer has not boiled.', b: { flux: 3 } },
   root:    { n: 'Tormentil root',     d: 'Binds what wants loosing.' },
   pork:    { n: 'Salt pork',          d: 'Three days of not being hungry.', b: { march: 1 } },
@@ -256,7 +256,7 @@ const UP = [
   { id: 'purse',  n: 'Where the pennies are',   d: 'You know who drops his purse on the quay. You start every waking with 6d more.', cost: [2, 4] },
   { id: 'name',   n: 'A face Cutler half knows', d: 'He cannot say why he trusts you. You start every waking with +1 Standing.', cost: [5, 8] },
   { id: 'string', n: 'The stringer by the quay', d: 'Wake with a waxed string already under your cap.', cost: [3] },
-  { id: 'badge',  n: "The cobblers' badge",     d: 'Wake with the pewter saints pinned over your heart.', cost: [6] },
+  { id: 'badge',  n: "The cobblers' badge",     d: 'Wake with the pewter saints pinned over your heart. Once in each waking, a failure that would wound you is tried again.', cost: [6] },
   { id: 'notyet', n: 'Not yet',                 d: 'Once each waking, the blow that should kill you does not.', cost: [9] }
 ];
 
@@ -371,9 +371,9 @@ scene('s_perkin', 'soton', 'Perkin wants to go home', `You find Perkin behind th
 ], { thread: 'perkin', when: perkinHere });
 
 scene('s_friar', 'soton', 'A friar with a tray', `A Franciscan is working the quay with a tray of pewter badges, a saint for every trade and terror: Christopher for travellers, Sebastian for arrows, Barbara for a sudden death. At the back, between the cheap ones, are two little cobblers with their lasts and awls. 'Crispin and Crispinian,' he says, following your eye. 'Martyrs. Very patient men. They had to be, the time it took.'`, [
-  { t: "Buy the cobblers' badge", cost: 4, if: () => !has('badge'), out: [`You pin it inside your jack, over the heart. It is cheap pewter, and it is warmer than it has any right to be.`, { item: 'badge' }] },
+  { t: "Buy the cobblers' badge", cost: 4, if: () => !has('badge'), out: [`You pin it inside your jack, over the heart. It is cheap pewter, and it is warmer than it has any right to be.`, { item: 'badge', say: 'The badge will give you one second try, when a failure would cost you blood.' }] },
   { t: 'Palm it while he blesses someone else', test: ['wits', 8, 'sneak'], if: () => !has('badge'),
-    win: [`He turns to sign the cross over a seasick knight and the badge is in your sleeve. You feel bad about robbing a friar for about as long as it takes to remember what the saints have been doing to you.`, { item: 'badge' }],
+    win: [`He turns to sign the cross over a seasick knight and the badge is in your sleeve. You feel bad about robbing a friar for about as long as it takes to remember what the saints have been doing to you.`, { item: 'badge', say: 'The badge will give you one second try, when a failure would cost you blood.' }],
     lose: [`For a man of God he has a grip like a farrier. He holds your wrist up for the whole quay to see, and Cutler, who cannot have a thief in the twenty, attends to you himself behind the sheds.`, { b: -1, st: -1 }] },
   { t: 'Tell him what is happening to you', if: () => M.runs >= 1,
     out: [`You tell him all of it: the dying, the quay, the awl. He listens with his head on one side. 'My son,' he says at last, 'I have heard the confessions of this army for a week. Yours is the first I have enjoyed.' He will not take a penny, and he will not say he believes you, but he blesses you twice, the second time slowly, as though making sure it takes.`, { grit: 1 }] },
@@ -3348,7 +3348,7 @@ const WANT_ASK = {
   vow: "have left your offering at the cobblers' altar in Southampton, and heard out the man from Soissons on the march"
 };
 /* Anonymous play counts. Only the public release loads the analytics tag; everywhere else this does nothing. */
-function track(name, p) { try { if (typeof gtag === 'function') gtag('event', name, Object.assign({ waking: M ? M.runs + (S && S.banked ? 0 : 1) : 0, version: '0.34' }, p || {})); } catch (e) {} }
+function track(name, p) { try { if (typeof gtag === 'function') gtag('event', name, Object.assign({ waking: M ? M.runs + (S && S.banked ? 0 : 1) : 0, version: '0.35' }, p || {})); } catch (e) {} }
 /* The author's record of how games go. Only the public release has the settings for it; everywhere else this does nothing. */
 const FB = {"projectId": "until-crispins-day", "apiKey": "AIzaSyC8t1QwGPsrX5cJ6TzwcXrVU6s4rzvFJnU"};
 function fbv(v) {
@@ -3364,7 +3364,7 @@ function report() {
     if (!M.pid) M.pid = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
     if (!M.startedAt) { M.startedAt = new Date().toISOString(); M.preRuns = M.runs || 0; }
     const seen = M.seen || {};
-    const doc = { name: String(M.name || '').slice(0, 30), want: M.want || '', version: '0.34', started: M.startedAt, updated: new Date().toISOString(),
+    const doc = { name: String(M.name || '').slice(0, 30), want: M.want || '', version: '0.35', started: M.startedAt, updated: new Date().toISOString(),
       runs: M.runs || 0, far: M.far || 0, wins: M.wins || 0, wonAt: M.wonAt || 0, trueAt: M.trueAt || 0, lived: M.lived || 0,
       scenes: Object.values(seen).reduce((a, b) => a + b, 0), seen: seen, ends: M.ends || {}, lastEnd: M.lastEnd || '', pre: M.preRuns || 0, found: Object.keys(M.how || {}).length };
     const f = {}; Object.keys(doc).forEach(k => { f[k] = fbv(doc[k]); });
@@ -3742,7 +3742,7 @@ function screenHtml() {
     paras(sl && sl.M.runs >= 1 ? `You are a cordwainer's apprentice with a borrowed bow, the twentieth man in a company of twenty archers. You have died in France, and woken on the quay at Southampton with all of it still in your head. Something is wanted of you. You do not yet know what it is.` : `It is August 1415. The King is taking an army to France, and you have taken his sixpence. You know nothing about war, and you are about to learn.`) +
     (sl ? '<p class="note">' + esc(SLOT_NAME[STORE.active] + ': ' + slotLine(sl)) + '</p>' : '') +
     '<div class="menu"><button class="go" type="button" data-act="play">' + (sl ? 'Continue' : 'Begin') + '</button><button class="choice" type="button" data-act="saves">Saved games</button><button class="choice" type="button" data-act="help">How it works</button>' + sndButton() + sizeButton() + '</div>' +
-    '<p class="ver">Version 0.34. The game saves itself in this browser after every choice.</p>' +
+    '<p class="ver">Version 0.35. The game saves itself in this browser after every choice.</p>' +
     (typeof gtag === 'function' || FB ? '<p class="ver">This page counts plays, and keeps a note of your archer\'s name and how far he got, so the author can see how the game plays. It does not know who you are.</p>' : '') +
     '<p class="ver">© 2026 Neil Fletcher.' + (COFFEE ? ' The game is free. If you like it, you can <a href="' + COFFEE + '" target="_blank" rel="noopener">buy me a coffee</a>.' : '') + '</p>';
   if (view === 'menu') return '<p class="eyebrow"><span>' + esc(SLOT_NAME[STORE.active]) + '</span></p><h2>Menu</h2><div class="menu">' +
