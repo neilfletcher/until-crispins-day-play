@@ -100,17 +100,17 @@ function render() {
       return '<tr><td>' + END[e] + '</td>' + row.map(v => '<td class="n">' + (v || '') + '</td>').join('') + '<td class="n">' + t + '</td></tr>'; }).join('') + '</table></div>';
 
   const won = P.filter(p => p.wonAt > 0).map(p => p.wonAt).sort((a, b) => a - b), tru = P.filter(p => p.trueAt > 0).map(p => p.trueAt).sort((a, b) => a - b);
-  const med = a => a.length ? a[Math.floor((a.length - 1) / 2)] : 0;
+  const med = a => { if (!a.length) return 0; const b = a.slice().sort((x, y) => x - y), m = b.length >> 1; return b.length % 2 ? b[m] : Math.round((b[m - 1] + b[m]) / 2 * 10) / 10; };
   h += '<p class="note">' + (won.length ? 'First win at a median of ' + med(won) + ' wakings (' + won.length + (won.length === 1 ? ' player). ' : ' players). ') : 'Nobody has saved the Duke yet. ') +
     (tru.length ? 'True ending at a median of ' + med(tru) + ' wakings (' + tru.length + (tru.length === 1 ? ' player).' : ' players).') : '') + '</p>';
 
-  const cols = [['name', 'Archer'], ['want', 'Enlisted for'], ['started', 'Started'], ['updated', 'Last played'], ['runs', 'Wakings', 1], ['far', 'Furthest'], ['scenes', 'Scenes', 1], ['wonAt', 'First win', 1], ['trueAt', 'Completed', 1], ['lastEnd', 'Last run'], ['version', 'Version']];
+  const cols = [['name', 'Archer'], ['want', 'Enlisted for'], ['started', 'Started'], ['updated', 'Last played'], ['runs', 'Wakings', 1], ['far', 'Furthest'], ['scenes', 'Scenes', 1], ['wonAt', 'First win', 1], ['trueAt', 'Completed', 1], ['lastEnd', 'Last run'], ['src', 'Where'], ['version', 'Version']];
   const rows = P.slice().sort((a, b) => { const x = a[sortKey], y = b[sortKey]; return (x > y ? 1 : x < y ? -1 : 0) * sortDir; });
   h += '<h2>Players</h2><div class="scroll"><table id="players"><tr>' + cols.map(([k, l, num]) => '<th data-sort="' + k + '"' + (num ? ' class="n"' : '') + '>' + l + (sortKey === k ? (sortDir > 0 ? ' ▲' : ' ▼') : '') + '</th>').join('') + '</tr>' +
     rows.map(p => { const le = (p.lastEnd || '').match(/^(.*)_(\w+)$/);
       return '<tr><td' + (p.trueAt ? ' class="won"' : '') + '>' + esc(p.name || 'unnamed') + '</td><td>' + esc(WANT[p.want] || '') + '</td><td>' + (p.pre > 0 || (p.pre === undefined && p.runs > 3 && new Date(p.updated) - new Date(p.started) < 36e5) ? 'before ' : '') + day(p.started) + '</td><td>' + day(p.updated) + '</td><td class="n">' + (p.runs || 0) + '</td><td>' + ACT_NAME[ACTS[p.far || 0]] +
-        '</td><td class="n">' + (p.scenes || 0) + '</td><td class="n">' + (p.wonAt || '') + '</td><td class="n">' + (p.trueAt || '') + '</td><td>' + (le ? esc((END[le[1]] || le[1]) + ', ' + (ACT_NAME[le[2]] || le[2])) : '') + '</td><td>' + esc(p.version || '') + '</td></tr>'; }).join('') + '</table></div>' +
-    '<p class="note">Players are anonymous. The name is the one they gave their archer. One row is one game in one browser. "Before" marks a game that was already under way when recording began, so its start is not known.</p>';
+        '</td><td class="n">' + (p.scenes || 0) + '</td><td class="n">' + (p.wonAt || '') + '</td><td class="n">' + (p.trueAt || '') + '</td><td>' + (le ? esc((END[le[1]] || le[1]) + ', ' + (ACT_NAME[le[2]] || le[2])) : '') + '</td><td>' + esc(p.src || '') + '</td><td>' + esc(p.version || '') + '</td></tr>'; }).join('') + '</table></div>' +
+    '<p class="note">Players are anonymous. The name is the one they gave their archer. One row is one game in one browser. "Before" marks a game that was already under way when recording began, so its start is not known. Before version 0.36 a game was recorded only at the start of each part and the end of each run, so an older row showing 2 scenes at Southampton may have played further. "Where" (site, itch) is recorded from 0.36.</p>';
 
   const seen = {}; P.forEach(p => Object.keys(p.seen || {}).forEach(k => { seen[k] = (seen[k] || 0) + p.seen[k]; }));
   const ids = Object.keys(CAT).length ? Object.keys(CAT) : Object.keys(seen);

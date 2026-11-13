@@ -3160,7 +3160,8 @@ function pickThread(act) {
     if (t === 'cutler') { const open = stages.filter(okId); if (open.length) id = SC[open[0]].first ? open[0] : lean(open); }
     else for (const st of stages) { const alts = [].concat(st); if (alts.some(x => S.played[x])) continue; const open = alts.filter(okId); if (open.length) { id = lean(open); break; } }
     if (!id) return;
-    const sc = S.pull[t] + rnd() * 0.9 - 0.25 * Math.min(3, M.seen[id] || 0);
+    const fresh = M.runs >= 1 && !Object.keys(TH[t]).some(a => [].concat(...TH[t][a].map(x => [].concat(x))).some(x => M.seen[x]));
+    const sc = S.pull[t] + rnd() * 0.9 - 0.25 * Math.min(3, M.seen[id] || 0) + (M.seen[id] ? 0 : 1) + (fresh ? 4 : 0) + (t === 'reeve' && (S.flags.reeve_owes || (S.flags.reeve_enemy && !S.flags.reeve_settled)) ? 2 : 0);
     if (sc > bs) { bs = sc; best = id; }
   });
   if (best) return best;
@@ -3217,6 +3218,7 @@ function enter() {
     if (!S.chap) { S.chap = {}; ACTS.slice(0, ACTS.indexOf(S.act) + (S.i > 0 ? 1 : 0)).forEach(a => { S.chap[a] = 1; }); }
     const opens = sc.act !== 'any' && sc.id !== 'origin' && CHAPTER[sc.act] && !S.chap[sc.act];
     track('scene_view', { scene: sc.id, act: sc.act });
+    S.rep = (S.rep || 0) + 1; if (!opens && S.rep % 2 === 0) report();
     if (opens) { track('reached_' + sc.act); report(); S.chap[sc.act] = 1; M.chapSeen = M.chapSeen || {}; S.chapFull = !M.chapSeen[sc.act] && (M.runs < 1 || ACTS.indexOf(sc.act) > prevFar); M.chapSeen[sc.act] = 1; }
     S.phase = opens ? 'chapter' : 'choose'; S.result = null;
     return;
@@ -3348,7 +3350,7 @@ const WANT_ASK = {
   vow: "have left your offering at the cobblers' altar in Southampton, and heard out the man from Soissons on the march"
 };
 /* Anonymous play counts. Only the public release loads the analytics tag; everywhere else this does nothing. */
-function track(name, p) { try { if (typeof gtag === 'function') gtag('event', name, Object.assign({ waking: M ? M.runs + (S && S.banked ? 0 : 1) : 0, version: '0.35' }, p || {})); } catch (e) {} }
+function track(name, p) { try { if (typeof gtag === 'function') gtag('event', name, Object.assign({ waking: M ? M.runs + (S && S.banked ? 0 : 1) : 0, version: '0.36' }, p || {})); } catch (e) {} }
 /* The author's record of how games go. Only the public release has the settings for it; everywhere else this does nothing. */
 const FB = {"projectId": "until-crispins-day", "apiKey": "AIzaSyC8t1QwGPsrX5cJ6TzwcXrVU6s4rzvFJnU"};
 function fbv(v) {
@@ -3358,15 +3360,16 @@ function fbv(v) {
   if (v && typeof v === 'object') { const f = {}; Object.keys(v).forEach(k => { f[k] = fbv(v[k]); }); return { mapValue: { fields: f } }; }
   return { nullValue: null };
 }
+let SRC = 'other'; try { const hn = location.hostname || ''; SRC = /itch/.test(hn) ? 'itch' : /github\.io$/.test(hn) ? 'site' : /claude/.test(hn) ? 'claude' : (hn || 'file'); } catch (e) { /* no location */ }
 function report() {
   if (!FB || !M || typeof fetch !== 'function') return;
   try {
     if (!M.pid) M.pid = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
     if (!M.startedAt) { M.startedAt = new Date().toISOString(); M.preRuns = M.runs || 0; }
     const seen = M.seen || {};
-    const doc = { name: String(M.name || '').slice(0, 30), want: M.want || '', version: '0.35', started: M.startedAt, updated: new Date().toISOString(),
+    const doc = { name: String(M.name || '').slice(0, 30), want: M.want || '', version: '0.36', started: M.startedAt, updated: new Date().toISOString(),
       runs: M.runs || 0, far: M.far || 0, wins: M.wins || 0, wonAt: M.wonAt || 0, trueAt: M.trueAt || 0, lived: M.lived || 0,
-      scenes: Object.values(seen).reduce((a, b) => a + b, 0), seen: seen, ends: M.ends || {}, lastEnd: M.lastEnd || '', pre: M.preRuns || 0, found: Object.keys(M.how || {}).length };
+      scenes: Object.values(seen).reduce((a, b) => a + b, 0), seen: seen, ends: M.ends || {}, lastEnd: M.lastEnd || '', pre: M.preRuns || 0, found: Object.keys(M.how || {}).length, src: SRC, oaths: Object.keys(M.oaths || {}).length };
     const f = {}; Object.keys(doc).forEach(k => { f[k] = fbv(doc[k]); });
     fetch('https://firestore.googleapis.com/v1/projects/' + FB.projectId + '/databases/(default)/documents/players/' + M.pid + '?key=' + FB.apiKey,
       { method: 'PATCH', keepalive: true, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fields: f }) }).catch(() => {});
@@ -3742,7 +3745,7 @@ function screenHtml() {
     paras(sl && sl.M.runs >= 1 ? `You are a cordwainer's apprentice with a borrowed bow, the twentieth man in a company of twenty archers. You have died in France, and woken on the quay at Southampton with all of it still in your head. Something is wanted of you. You do not yet know what it is.` : `It is August 1415. The King is taking an army to France, and you have taken his sixpence. You know nothing about war, and you are about to learn.`) +
     (sl ? '<p class="note">' + esc(SLOT_NAME[STORE.active] + ': ' + slotLine(sl)) + '</p>' : '') +
     '<div class="menu"><button class="go" type="button" data-act="play">' + (sl ? 'Continue' : 'Begin') + '</button><button class="choice" type="button" data-act="saves">Saved games</button><button class="choice" type="button" data-act="help">How it works</button>' + sndButton() + sizeButton() + '</div>' +
-    '<p class="ver">Version 0.35. The game saves itself in this browser after every choice.</p>' +
+    '<p class="ver">Version 0.36. The game saves itself in this browser after every choice.</p>' +
     (typeof gtag === 'function' || FB ? '<p class="ver">This page counts plays, and keeps a note of your archer\'s name and how far he got, so the author can see how the game plays. It does not know who you are.</p>' : '') +
     '<p class="ver">© 2026 Neil Fletcher.' + (COFFEE ? ' The game is free. If you like it, you can <a href="' + COFFEE + '" target="_blank" rel="noopener">buy me a coffee</a>.' : '') + '</p>';
   if (view === 'menu') return '<p class="eyebrow"><span>' + esc(SLOT_NAME[STORE.active]) + '</span></p><h2>Menu</h2><div class="menu">' +
