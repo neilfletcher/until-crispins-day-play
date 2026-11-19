@@ -1303,7 +1303,7 @@ scene('bm_dickon', 'battle', "Suffolk's banner", () => `On the right, by the Tra
 scene('bm_king', 'battle', "The King's voice", () => `The King comes along the front of his battle on foot, with his helm under his arm so that men can see his face. There is a scar by his nose the size of a thumbnail. He is saying something to each knot of men as he passes. To the archers he says that he would sooner die on this field than be ransomed at England's cost, and that the French have promised to take three fingers from every bowman's right hand. Then he looks along the wedge, and for a moment he looks at you.`, [
   { t: 'Meet his eye',
     out: [`It lasts no longer than a blink. He has grey eyes and he is very tired, and he is twenty-eight years old. He nods once, to you or to the wedge, and goes on. You find that your hands are steady.`, { eye: 1 }] },
-  { t: 'Look at the scar', if: () => S.played.h_ieuan,
+  { t: 'Look at the scar', if: () => S.played.h_ieuan && !S.played.bm_ieuan,
     out: [`Six inches in, Ieuan said. Somebody loosed it. You look along the line to where the old Welshman is standing with his bow grounded, and he is looking at the scar too, with an expression of mild proprietary interest, like a mason passing a wall he built.`, { eye: 1, wits: 1 }] },
   { t: 'Shout with the rest',
     out: [`Five thousand men shout. You did not know you had a voice that size. It comes back off the woods on either hand, and for a moment the French line is very still.`, { st: 1 }] }
@@ -3350,7 +3350,7 @@ const WANT_ASK = {
   vow: "have left your offering at the cobblers' altar in Southampton, and heard out the man from Soissons on the march"
 };
 /* Anonymous play counts. Only the public release loads the analytics tag; everywhere else this does nothing. */
-function track(name, p) { try { if (typeof gtag === 'function') gtag('event', name, Object.assign({ waking: M ? M.runs + (S && S.banked ? 0 : 1) : 0, version: '0.36' }, p || {})); } catch (e) {} }
+function track(name, p) { try { if (typeof gtag === 'function') gtag('event', name, Object.assign({ waking: M ? M.runs + (S && S.banked ? 0 : 1) : 0, version: '0.37' }, p || {})); } catch (e) {} }
 /* The author's record of how games go. Only the public release has the settings for it; everywhere else this does nothing. */
 const FB = {"projectId": "until-crispins-day", "apiKey": "AIzaSyC8t1QwGPsrX5cJ6TzwcXrVU6s4rzvFJnU"};
 function fbv(v) {
@@ -3367,7 +3367,7 @@ function report() {
     if (!M.pid) M.pid = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
     if (!M.startedAt) { M.startedAt = new Date().toISOString(); M.preRuns = M.runs || 0; }
     const seen = M.seen || {};
-    const doc = { name: String(M.name || '').slice(0, 30), want: M.want || '', version: '0.36', started: M.startedAt, updated: new Date().toISOString(),
+    const doc = { name: String(M.name || '').slice(0, 30), want: M.want || '', version: '0.37', started: M.startedAt, updated: new Date().toISOString(),
       runs: M.runs || 0, far: M.far || 0, wins: M.wins || 0, wonAt: M.wonAt || 0, trueAt: M.trueAt || 0, lived: M.lived || 0,
       scenes: Object.values(seen).reduce((a, b) => a + b, 0), seen: seen, ends: M.ends || {}, lastEnd: M.lastEnd || '', pre: M.preRuns || 0, found: Object.keys(M.how || {}).length, src: SRC, oaths: Object.keys(M.oaths || {}).length };
     const f = {}; Object.keys(doc).forEach(k => { f[k] = fbv(doc[k]); });
@@ -3617,10 +3617,18 @@ function renderSheet() {
     '<div><dt>Coin</dt><dd>' + money(S.coin) + '</dd></div><div><dt>Sheaves</dt><dd>' + S.arrows + '</dd></div></dl></div>' +
     '<div><h3>Standing</h3><p>' + standingWord(S.standing) + (S.flags.baggage ? ', posted to the baggage' : S.flags.centre ? ', placed in the centre' : '') + '</p></div>' +
     (S.oath && oathOf(S.oath) ? '<div><h3>Sworn</h3><p>' + esc(oathOf(S.oath).n) + '</p></div>' : '') +
-    '<div><h3>Kit and company</h3><ul class="kit">';
+    '<div><h3>Kit</h3><ul class="kit">';
   if (!S.items.length) h += '<li><small>A borrowed bow and what you stand up in.</small></li>';
   S.items.forEach(i => { h += '<li class="' + (ITEM[i].ill ? 'ill' : '') + '">' + esc(ITEM[i].n) + '<small>' + esc(ITEM[i].d) + '</small></li>'; });
-  h += '<li>Perkin<small>' + (S.perkin === 'dead' ? 'Dead.' : S.perkin === 'home' ? 'Gone home to Winchester.' : S.flags.cold ? 'With the company. Not speaking to you.' : bonded() ? 'At your shoulder.' : 'With the company.') + '</small></li></ul></div>' +
+  h += '</ul></div><div><h3>Who is who</h3><ul class="kit">';
+  const pm = PEOPLE.reduce((o, [n, f]) => { o[n] = f[0][0](M); return o; }, {});
+  h += '<li>Cutler<small>Hob Cutler, the vintenar. The twenty is his.</small></li>';
+  h += '<li>Perkin<small>The baker\'s boy from your street. ' + (S.perkin === 'dead' ? 'Dead.' : S.perkin === 'home' ? 'Gone home to Winchester.' : S.flags.cold ? 'Not speaking to you.' : bonded() ? 'At your shoulder.' : 'With the company.') + '</small></li>';
+  if (pm.Ieuan) h += '<li>Ieuan<small>The old Welshman, and the best shot in the twenty.' + (S.played.bm_ieuan ? ' Hurt, and out of the line.' : '') + '</small></li>';
+  if (pm.Reeve) h += '<li>Reeve<small>Jankin Reeve, an old soldier. No friend to new men.</small></li>';
+  if (M.seen.s_billet || M.runs >= 1) h += '<li>Hodge<small>Old Hodge. He has the twenty if Cutler goes down.' + (S.flags.hodge_gone ? ' Sent home sick.' : '') + '</small></li>';
+  if (M.want === 'brother') h += '<li>Dickon<small>Your brother, with the Earl of Suffolk\'s men.</small></li>';
+  h += '</ul></div>' +
     (M.runs < 1 || (M.runs === 1 && (S.phase === 'dead' || S.phase === 'lived' || S.phase === 'won')) ? '' : '<div><h3>This waking</h3><p>' + S.lessons + (S.lessons === 1 ? ' lesson' : ' lessons') + ' so far</p></div>') +
     ((S.journal || []).length ? '<div><h3>The road so far</h3>' + journalHtml(false) + '</div>' : '');
   $('sheet').innerHTML = h;
@@ -3745,7 +3753,7 @@ function screenHtml() {
     paras(sl && sl.M.runs >= 1 ? `You are a cordwainer's apprentice with a borrowed bow, the twentieth man in a company of twenty archers. You have died in France, and woken on the quay at Southampton with all of it still in your head. Something is wanted of you. You do not yet know what it is.` : `It is August 1415. The King is taking an army to France, and you have taken his sixpence. You know nothing about war, and you are about to learn.`) +
     (sl ? '<p class="note">' + esc(SLOT_NAME[STORE.active] + ': ' + slotLine(sl)) + '</p>' : '') +
     '<div class="menu"><button class="go" type="button" data-act="play">' + (sl ? 'Continue' : 'Begin') + '</button><button class="choice" type="button" data-act="saves">Saved games</button><button class="choice" type="button" data-act="help">How it works</button>' + sndButton() + sizeButton() + '</div>' +
-    '<p class="ver">Version 0.36. The game saves itself in this browser after every choice.</p>' +
+    '<p class="ver">Version 0.37. The game saves itself in this browser after every choice.</p>' +
     (typeof gtag === 'function' || FB ? '<p class="ver">This page counts plays, and keeps a note of your archer\'s name and how far he got, so the author can see how the game plays. It does not know who you are.</p>' : '') +
     '<p class="ver">© 2026 Neil Fletcher.' + (COFFEE ? ' The game is free. If you like it, you can <a href="' + COFFEE + '" target="_blank" rel="noopener">buy me a coffee</a>.' : '') + '</p>';
   if (view === 'menu') return '<p class="eyebrow"><span>' + esc(SLOT_NAME[STORE.active]) + '</span></p><h2>Menu</h2><div class="menu">' +
